@@ -13,8 +13,9 @@ puts github_repos.all.inspect # Nothing here
 gollum = GithubGem.new('gollum', 'gollum')
 lib    = GithubGem.new('gollum', 'gollum-lib', 'gemspec.rb')
 rjgit  = GithubGem.new('repotag', 'rjgit', 'gemspec.rb')
+rails  = GithubGem.new('rails', 'rails')
 
-gems = [gollum, lib, rjgit]
+gems = [gollum, lib, rjgit, rails]
 
 gems.each do |gem|
   DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
@@ -24,3 +25,4 @@ sleep 20
 
 puts github_repos.keys.inspect
 puts JSON.parse(github_repos['gollum/gollum']).inspect # Yay, content!
+puts JSON.parse(github_repos['rails/rails']).inspect # Yay, content!

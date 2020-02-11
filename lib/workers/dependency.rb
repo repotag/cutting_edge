@@ -20,9 +20,15 @@ class DependencyWorker
 
   def get_results(dependencies)
     if dependencies
-      results = []
+      results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => []}
       dependencies.each do |dep, latest_version|
-        results << dependency(dep.name, dep.requirement.to_s, latest_version.to_s, is_outdated?(dep, latest_version))
+        dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s)
+        if is_outdated?(dep, latest_version)
+          outdated = calculate_version_difference(dep, latest_version.respond_to?(:last) ? latest_version.last : latest_version)
+          results[outdated] << dependency_hash
+        else
+          results[:ok] << dependency_hash
+        end 
       end
       results
     else
@@ -30,12 +36,11 @@ class DependencyWorker
     end
   end
 
-  def dependency(name, requirement, latest, outdated)
+  def dependency(name, requirement, latest)
     {
       :name => name,
       :required => requirement,
-      :latest => latest,
-      :outdated => outdated
+      :latest => latest
     }
   end
 
@@ -82,4 +87,22 @@ class DependencyWorker
     !dependency.requirement.satisfied_by?(latest_version)
   end
 
+  def calculate_version_difference(dependency, latest_version)
+    if dependency.requirement.requirements.first.first == '='
+      current_version = dependency.requirement.requirements.first.last
+    else
+      current_version = Gem::SpecFetcher.fetcher.search_for_dependency(dependency).first.first.first.version
+    end
+
+    current_segments = current_version.canonical_segments
+    latest_segments  = latest_version.canonical_segments
+
+    if latest_segments[0].to_i > current_segments[0].to_i
+      return :outdated_major
+    elsif latest_segments[1].to_i > current_segments[1].to_i
+      return :outdated_minor
+    else
+      return :outdated_bump
+    end
+  end
 end

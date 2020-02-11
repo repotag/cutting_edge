@@ -10,12 +10,12 @@ class DependencyWorker
   include Sidekiq::Worker
   include VersionRequirementComparator
 
-  def perform(identifier, gemspec_url, gemfile_url, source = :github)
+  def perform(identifier, gemspec_url, gemfile_url)
     gemspec_deps = gemspec(gemspec_url)
     gemfile_deps = gemfile(gemfile_url)
     gemspec_results = get_results(gemspec_deps)
     gemfile_results = get_results(gemfile_deps)
-    add_to_redis(source, identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
+    add_to_redis(identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
   end
 
   private
@@ -46,11 +46,11 @@ class DependencyWorker
     }
   end
 
-  def add_to_redis(source, identifier, dependencies)
+  def add_to_redis(identifier, dependencies)
     Sidekiq.redis do |connection|
       Redis::Objects.redis = connection
-      gem_list = Redis::HashKey.new(source.to_s)
-      gem_list[identifier] = dependencies.to_json
+      store = Redis::Value.new(identifier)
+      store.value = dependencies.to_json
     end
   end
 

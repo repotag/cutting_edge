@@ -1,6 +1,8 @@
 class GithubGem
   HOST = 'https://raw.githubusercontent.com'
 
+  attr_reader :token
+
   def initialize(org, name, gemspec = nil, gemfile = nil, branch = nil, token = nil)
     @org     = org
     @name    = name

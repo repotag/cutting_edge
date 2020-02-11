@@ -6,10 +6,14 @@ require 'yaml'
 require 'redis-objects'
 
 module RubyDepsHelpers
-  def fetch_all(repositories)
+  def fetch_all_repos(repositories)
     repositories.each do |gem|
-      DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
+      fetch_repo(gem)
     end
+  end
+
+  def fetch_repo(gem)
+    DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
   end
 end
 
@@ -36,7 +40,7 @@ class RubyDeps < Sinatra::Base
     Sidekiq.redis do |connection|
       Redis::Objects.redis = connection
     end
-    result = Redis::Value.new("#{org}/#{name}")
+    result = Redis::Value.new(@identifier)
     content_type :json
     result.value # Todo: check whether value exists yet? If not, call worker / wait / timeout?
   end
@@ -46,9 +50,20 @@ class RubyDeps < Sinatra::Base
     return 'YAY'
   end
 
+  post %r{/(.+)/(.+)/refresh} do |org, name|
+    repo_defined?(org, name)
+    if params[:token] == settings.repositories[@identifier].token
+      fetch_repo(settings.repositories[@identifier])
+      status 200
+    else
+      status 401
+    end
+  end
+
   private
 
   def repo_defined?(org, name)
+    @identifier = "#{org}/#{name}"
     halt 404, '404 Not Found' unless settings.repositories.has_key?("#{org}/#{name}")
   end
 
@@ -65,7 +80,7 @@ end
 
 puts "Running Sidekiq..."
 include RubyDepsHelpers
-fetch_all(repositories.values)
+fetch_all_repos(repositories.values)
 
 puts "Starting Sinatra..."
 RubyDeps.set(:repositories, repositories)

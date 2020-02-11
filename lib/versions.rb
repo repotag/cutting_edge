@@ -26,6 +26,7 @@ module VersionRequirementComparator
         end
       end
     end
+    return :unknown # This can occur if latest_version is actually lower than the requirement (e.g., when a newer version of a gem has been yanked)
   end
 
   private

@@ -22,7 +22,8 @@ class DependencyWorker
 
   def get_results(dependencies)
     if dependencies
-      results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => []}
+      dependencies.select! {|dep| dep.first.type != :development}
+      results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => [], :unknown => []}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s)
         if is_outdated?(dep, latest_version)

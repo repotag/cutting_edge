@@ -12,6 +12,10 @@ class GithubGem
     @token   = token
   end
 
+  def source
+    'github'
+  end
+
   def gemfile_location
     File.join(HOST, @org, @name, @branch, @gemfile)
   end
@@ -21,6 +25,22 @@ class GithubGem
   end
 
   def identifier
-    File.join(@org, @name)
+    File.join(source, @org, @name)
+  end
+end
+
+class GitlabGem < GithubGem
+  HOST = 'https://gitlab.com/'
+
+  def source
+    'gitlab'
+  end
+
+  def gemfile_location
+    File.join(HOST, @org, @name, 'raw', @branch, @gemfile)
+  end
+
+  def gemspec_location
+    File.join(HOST, @org, @name, 'raw', @branch, @gemspec)
   end
 end

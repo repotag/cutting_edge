@@ -18,12 +18,17 @@ module RubyDepsHelpers
 end
 
 config = <<YAML
-gollum:
+github:
   gollum:
-    api_token: secret
-  gollum-lib:
-    api_token: secret
-    gemspec: gemspec.rb
+    gollum:
+      api_token: secret
+    gollum-lib:
+      api_token: secret
+      gemspec: gemspec.rb
+gitlab:
+  cthowl01:
+    team-chess-ruby:
+      api_token: secret
 YAML
 
 options = {
@@ -52,8 +57,8 @@ class RubyDeps < Sinatra::Base
 
   post %r{/(.+)/(.+)/refresh} do |org, name|
     repo_defined?(org, name)
-    if params[:token] == settings.repositories[@identifier].token
-      fetch_repo(settings.repositories[@identifier])
+    if params[:token] == settings.repositories[@repo].token
+      fetch_repo(settings.repositories[@repo])
       status 200
     else
       status 401
@@ -63,18 +68,25 @@ class RubyDeps < Sinatra::Base
   private
 
   def repo_defined?(org, name)
-    @identifier = "#{org}/#{name}"
-    halt 404, '404 Not Found' unless settings.repositories.has_key?("#{org}/#{name}")
+    @repo = "#{org}/#{name}"
+    if repo = settings.repositories[@repo]
+      @identifier = repo.identifier
+    else
+      halt 404, '404 Not Found'
+    end
   end
 
 end
 
 repositories = {}
-YAML.load(config).each do |org, value|
-  value.each do |repo, settings|
-    cfg = settings.is_a?(Hash) ? settings : {}
-    gem = GithubGem.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
-    repositories[gem.identifier] = gem
+YAML.load(config).each do |source, orgs|
+  orgs.each do |org, value|
+    value.each do |repo, settings|
+      cfg = settings.is_a?(Hash) ? settings : {}
+      gem_class = Object.const_get("#{source.capitalize}Gem")
+      gem = gem_class.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      repositories["#{org}/#{repo}"] = gem
+    end
   end
 end
 

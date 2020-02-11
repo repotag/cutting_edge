@@ -45,7 +45,7 @@ class RubyDeps < Sinatra::Base
     Sidekiq.redis do |connection|
       Redis::Objects.redis = connection
     end
-    result = Redis::Value.new(@identifier)
+    result = Redis::Value.new(@repo.identifier)
     content_type :json
     result.value # Todo: check whether value exists yet? If not, call worker / wait / timeout?
   end
@@ -57,8 +57,8 @@ class RubyDeps < Sinatra::Base
 
   post %r{/(.+)/(.+)/refresh} do |org, name|
     repo_defined?(org, name)
-    if params[:token] == settings.repositories[@repo].token
-      fetch_repo(settings.repositories[@repo])
+    if params[:token] == @repo.token
+      fetch_repo(@repo)
       status 200
     else
       status 401
@@ -68,12 +68,7 @@ class RubyDeps < Sinatra::Base
   private
 
   def repo_defined?(org, name)
-    @repo = "#{org}/#{name}"
-    if repo = settings.repositories[@repo]
-      @identifier = repo.identifier
-    else
-      halt 404, '404 Not Found'
-    end
+    halt 404, '404 Not Found' unless @repo = settings.repositories["#{org}/#{name}"]
   end
 
 end

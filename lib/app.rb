@@ -15,8 +15,10 @@ end
 
 config = <<YAML
 gollum:
-  gollum: true
+  gollum:
+    api_token: secret
   gollum-lib:
+    api_token: secret
     gemspec: gemspec.rb
 YAML
 
@@ -56,7 +58,7 @@ repositories = {}
 YAML.load(config).each do |org, value|
   value.each do |repo, settings|
     cfg = settings.is_a?(Hash) ? settings : {}
-    gem = GithubGem.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil))
+    gem = GithubGem.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
     repositories[gem.identifier] = gem
   end
 end

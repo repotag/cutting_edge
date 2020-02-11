@@ -25,7 +25,7 @@ class Badge
     end
     number = Integer(num) rescue nil if num
 
-    svg = Victor::SVG.new width: BADGE_OPTIONS[status][:width], height: 32
+    svg = Victor::SVG.new width: BADGE_OPTIONS[status][:width], height: 32, template: :minimal
 
     style = {
       stroke: '#d3d3d3',
@@ -39,14 +39,8 @@ class Badge
         text "#{number} Dependencies #{BADGE_OPTIONS[status][:text]}", x: 10, y: 20
       end
     end
-    return svg
+    return svg.render
   end
 
 end
 
-positive_badge = Badge.build_badge(:up_to_date)
-positive_badge.save 'uptodate' # Or use positive_badge.render
-negative_badge = Badge.build_badge(:out_of_date, 6)
-negative_badge.save 'outdated'
-unknown_badge = Badge.build_badge(:foo)
-unknown_badge.save 'unknown'

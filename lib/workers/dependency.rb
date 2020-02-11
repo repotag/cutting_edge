@@ -4,9 +4,11 @@ require 'http'
 require 'sidekiq'
 require 'json'
 require 'redis-objects'
+require File.expand_path('../../versions.rb', __FILE__)
 
 class DependencyWorker
   include Sidekiq::Worker
+  include VersionRequirementComparator
 
   def perform(identifier, gemspec_url, gemfile_url, source = :github)
     gemspec_deps = gemspec(gemspec_url)
@@ -24,7 +26,7 @@ class DependencyWorker
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s)
         if is_outdated?(dep, latest_version)
-          outdated = calculate_version_difference(dep, latest_version.respond_to?(:last) ? latest_version.last : latest_version)
+          outdated = version_requirement_diff(dep.requirement, latest_version.respond_to?(:last) ? latest_version.last : latest_version)
           results[outdated] << dependency_hash
         else
           results[:ok] << dependency_hash
@@ -87,22 +89,4 @@ class DependencyWorker
     !dependency.requirement.satisfied_by?(latest_version)
   end
 
-  def calculate_version_difference(dependency, latest_version)
-    if dependency.requirement.requirements.first.first == '='
-      current_version = dependency.requirement.requirements.first.last
-    else
-      current_version = Gem::SpecFetcher.fetcher.search_for_dependency(dependency).first.first.first.version
-    end
-
-    current_segments = current_version.canonical_segments
-    latest_segments  = latest_version.canonical_segments
-
-    if latest_segments[0].to_i > current_segments[0].to_i
-      return :outdated_major
-    elsif latest_segments[1].to_i > current_segments[1].to_i
-      return :outdated_minor
-    else
-      return :outdated_bump
-    end
-  end
 end

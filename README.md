@@ -1,42 +1,44 @@
 # rubydeps
 
+The DependencyWorker currently performs the following actions:
+
+* Fetch gemfile and gemspec for a given Gem
+  * Currently, the GithubGem class specifies the needed information for a gem hosted on github. Other providers could be added.
+* Parse both files for dependency-requirements
+* Determine the latest version for each required gem
+* Generate a Hash of results of the following form:
+```ruby
+{
+  "gemspec" => [
+    {"name"=>"gollum-lib", "required"=>">= 4.2.10, ~> 4.2", "latest"=>"4.2.10", "outdated"=>false},
+    {"name"=>"kramdown", "required"=>"~> 1.9.0", "latest"=>"2.1.0", "outdated"=>true}
+  ],
+  "gemfile" => [
+    {"name"=>"rake", "required"=>"~> 10.4", "latest"=>"13.0.1", "outdated"=>true}
+  ]
+}
 ```
-$ bundle exec ruby test.rb 
-First trying with Gem::SpecFetcher
-Checking dependencies status for rake
-Current required version of rake: < 14.0, >= 10.0
-Latest version of rake: 13.0.1
-So is the rake requirement outdated? true
+* These results are stored as JSON in Redis using a `Redis::HashKey`. The default Redis key under which this `HashKey` is saved is `:github`.
+  
 
-Checking dependencies status for gollum
-Current required version of gollum: < 4.0, >= 2.0
-Latest version of gollum: 4.1.4
-So is the gollum requirement outdated? false
+## Example usage
 
-Benchmark with Gem::SpecFetcher
-Rehearsal ----------------------------------------------
-             0.000000   0.000000   0.000000 (  0.001200)
-------------------------------------- total: 0.000000sec
+See `test.rb`. The basics:
 
-                 user     system      total        real
-             0.000000   0.000000   0.000000 (  0.000706)
+* start a Redis server with `redis-server`
+* start `sidekiq` with `bundle exec sidekiq -r ./lib/workers/dependency.rb`
+* Run the following code (or `bundle exec ruby test.rb`):
 
-Now trying with rubygems API
-Checking dependencies status for rake
-Current required version of rake: < 14.0, >= 10.0
-Latest version of rake: 13.0.1
-So is the rake requirement outdated? true
+```ruby
+Redis::Objects.redis = Redis.new
+github_repos = Redis::HashKey.new(:github)
+# There is nothing in the HashKey at the moment
 
-Checking dependencies status for gollum
-Current required version of gollum: < 4.0, >= 2.0
-Latest version of gollum: 4.1.4
-So is the gollum requirement outdated? false
+gem = GithubGem.new('gollum', 'gollum')
+DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location) # Fire up a Sidekiq job
 
-Benchmark with rubygems API 
-Rehearsal ----------------------------------------------
-             0.010000   0.000000   0.010000 (  1.126841)
-------------------------------------- total: 0.010000sec
+# Sleep 5
 
-                 user     system      total        real
-             0.000000   0.000000   0.000000 (  0.672203)
+puts github_repos.keys # ['gollum/gollum']
+github_repos['gollum/gollum'] # The JSON results hash
 ```

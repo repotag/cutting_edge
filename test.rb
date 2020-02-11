@@ -1,67 +1,26 @@
-require 'gemnasium/parser'
-require 'rubygems'
-require 'httparty'
-require 'benchmark'
+require File.expand_path('../lib/workers/dependency.rb', __FILE__)
+require File.expand_path('../lib/gems.rb', __FILE__)
+require 'redis'
+require 'redis-objects'
+require 'json'
 
-def api_latest_version_spec(gem_name)
-  response = HTTParty.get("https://rubygems.org/api/v1/versions/#{gem_name}/latest.json").parsed_response
-  Gem::Specification.new do |spec|
-    spec.name = gem_name
-    spec.version = response['version']
-  end
+Redis::Objects.redis = Redis.new
+github_repos = Redis::HashKey.new(:github)
+github_repos.clear # Deletes the key from redis
+
+puts github_repos.all.inspect # Nothing here
+
+gollum = GithubGem.new('gollum', 'gollum')
+lib    = GithubGem.new('gollum', 'gollum-lib', 'gemspec.rb')
+rjgit  = GithubGem.new('repotag', 'rjgit', 'gemspec.rb')
+
+gems = [gollum, lib, rjgit]
+
+gems.each do |gem|
+  DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
 end
 
-def latest_version_spec(gem_name)
-  Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(gem_name, nil)).flatten.first
-end
+sleep 20
 
-content = <<EOF
-gem 'rake', '>= 10.0', '< 14.0'
-gem 'gollum', '>= 2.0', '< 4.0'
-EOF
-gemfile ||= Gemnasium::Parser.gemfile(content)
-dependencies = gemfile.dependencies
-
-puts "First trying with Gem::SpecFetcher\n"
-
-dependencies.each do |dep|
-  puts "Checking dependencies status for #{dep.name}"
-  puts "Current required version of #{dep.name}: #{dep.requirement.to_s}"
-  latest_spec = latest_version_spec(dep.name)
-  puts "Latest version of #{dep.name}: #{latest_spec.version}"
-  puts "So is the #{dep.name} requirement outdated? #{dep.requirement.satisfied_by?(latest_spec.version)}"
-  puts "\n"
-end
-
-puts "Benchmark with Gem::SpecFetcher\n"
-
-Benchmark.bmbm(10) do |x|
-  x.report {
-    dependencies.each do |dep|
-      latest_spec = latest_version_spec(dep.name)
-    end    
-  }
-end
-
-puts "\n"
-
-puts "Now trying with rubygems API\n"
-
-dependencies.each do |dep|
-  puts "Checking dependencies status for #{dep.name}"
-  puts "Current required version of #{dep.name}: #{dep.requirement.to_s}"
-  latest_spec = api_latest_version_spec(dep.name)
-  puts "Latest version of #{dep.name}: #{latest_spec.version}"
-  puts "So is the #{dep.name} requirement outdated? #{dep.requirement.satisfied_by?(latest_spec.version)}"
-  puts "\n"
-end
-
-puts "Benchmark with rubygems API \n"
-
-Benchmark.bmbm(10) do |x|
-  x.report {
-    dependencies.each do |dep|
-      latest_spec = api_latest_version_spec(dep.name)
-    end    
-  }
-end
+puts github_repos.keys.inspect
+puts JSON.parse(github_repos['gollum/gollum']).inspect # Yay, content!

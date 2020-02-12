@@ -6,13 +6,13 @@ require 'yaml'
 require 'redis-objects'
 
 module RubyDepsHelpers
-  def fetch_all_repos(repositories)
+  def worker_fetch_all(repositories)
     repositories.each do |gem|
-      fetch_repo(gem)
+      worker_fetch(gem)
     end
   end
 
-  def fetch_repo(gem)
+  def worker_fetch(gem)
     DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
   end
 end
@@ -58,7 +58,7 @@ class RubyDeps < Sinatra::Base
   post %r{/(.+)/(.+)/refresh} do |org, name|
     repo_defined?(org, name)
     if params[:token] == @repo.token
-      fetch_repo(@repo)
+      worker_fetch(@repo)
       status 200
     else
       status 401
@@ -87,7 +87,7 @@ end
 
 puts "Running Sidekiq..."
 include RubyDepsHelpers
-fetch_all_repos(repositories.values)
+worker_fetch_all(repositories.values)
 
 puts "Starting Sinatra..."
 RubyDeps.set(:repositories, repositories)

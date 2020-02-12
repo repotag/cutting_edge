@@ -31,7 +31,7 @@ module VersionRequirementComparator
 
   private
 
-  # Translate ~> contraints to two individual constraints: >= lower_bound && < upper_bound
+  # Translate ~> constraints to two individual constraints: >= lower_bound && < upper_bound
   def translate_tilde(version)
     segments = version.canonical_segments.dup
     segments.pop while segments.any? { |s| String === s } # Ignore alpha, pre, etc.

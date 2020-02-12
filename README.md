@@ -6,6 +6,8 @@
 * start `sidekiq` with `bundle exec sidekiq -r ./lib/workers/dependency.rb`
 * start the app with `bundle exec ruby lib/app.rb`
 * Runs on http://localhost:4567
+* Routes under `/source/org/name`
+  * For example: http://localhost:4567/github/gollum/gollum
 
 ## DependencyWorker
 

@@ -40,8 +40,8 @@ class RubyDeps < Sinatra::Base
 
   include RubyDepsHelpers
 
-  get %r{/(.+)/(.+)/info} do |org, name|
-    repo_defined?(org, name)
+  get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
+    repo_defined?(source, org, name)
     Sidekiq.redis do |connection|
       Redis::Objects.redis = connection
     end
@@ -50,13 +50,13 @@ class RubyDeps < Sinatra::Base
     result.value # Todo: check whether value exists yet? If not, call worker / wait / timeout?
   end
 
-  get %r{/(.+)/(.+)/svg} do |org, name|
-    repo_defined?(org, name)
+  get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
+    repo_defined?(source, org, name)
     return 'YAY'
   end
 
-  post %r{/(.+)/(.+)/refresh} do |org, name|
-    repo_defined?(org, name)
+  post %r{/(.+)/(.+)/(.+)/refresh} do |source, org, name|
+    repo_defined?(source, org, name)
     if params[:token] == @repo.token
       worker_fetch(@repo)
       status 200
@@ -67,8 +67,8 @@ class RubyDeps < Sinatra::Base
 
   private
 
-  def repo_defined?(org, name)
-    halt 404, '404 Not Found' unless @repo = settings.repositories["#{org}/#{name}"]
+  def repo_defined?(source, org, name)
+    halt 404, '404 Not Found' unless @repo = settings.repositories["#{source}/#{org}/#{name}"]
   end
 
 end
@@ -80,7 +80,7 @@ YAML.load(config).each do |source, orgs|
       cfg = settings.is_a?(Hash) ? settings : {}
       gem_class = Object.const_get("#{source.capitalize}Gem")
       gem = gem_class.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
-      repositories["#{org}/#{repo}"] = gem
+      repositories["#{source}/#{org}/#{repo}"] = gem
     end
   end
 end

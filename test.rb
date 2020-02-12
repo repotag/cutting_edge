@@ -5,10 +5,6 @@ require 'redis-objects'
 require 'json'
 
 Redis::Objects.redis = Redis.new
-github_repos = Redis::HashKey.new(:github)
-github_repos.clear # Deletes the key from redis
-
-puts github_repos.all.inspect # Nothing here
 
 gollum = GithubGem.new('gollum', 'gollum')
 lib    = GithubGem.new('gollum', 'gollum-lib', 'gemspec.rb')
@@ -18,11 +14,24 @@ rails  = GithubGem.new('rails', 'rails')
 gems = [gollum, lib, rjgit, rails]
 
 gems.each do |gem|
+  Redis::Objects.redis.del(gem.identifier) # Clear the Redis store
+end
+
+gem_dependencies = gems.map do |gem|
+  val = Redis::Value.new(gem.identifier)
+  puts val.value # Nothing here yet
+  val
+end
+
+gems.each do |gem|
   DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
 end
 
 sleep 20
 
-puts github_repos.keys.inspect
-puts JSON.parse(github_repos['gollum/gollum']).inspect # Yay, content!
-puts JSON.parse(github_repos['rails/rails']).inspect # Yay, content!
+gem_dependencies.each do |val|
+  puts val.value # Yay, content!
+end
+
+puts JSON.parse(gem_dependencies.first.value).inspect # Yay, content!
+puts JSON.parse(gem_dependencies.last.value).inspect # Yay, content!

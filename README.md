@@ -74,3 +74,7 @@ DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile
 
 puts gem_dependencies.value # The JSON results hash
 ```
+
+## License
+
+This work is licensed under the terms of the [GNU GPLv3.0](LICENSE).

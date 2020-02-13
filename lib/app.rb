@@ -1,9 +1,10 @@
-require 'sinatra'
-require 'sidekiq'
 require File.expand_path('../gems.rb', __FILE__)
 require File.expand_path('../workers/dependency.rb', __FILE__)
+
+require 'sinatra'
 require 'yaml'
-require 'redis-objects'
+require 'json'
+require 'moneta'
 
 module RubyDepsHelpers
   def worker_fetch_all(repositories)
@@ -37,18 +38,20 @@ options = {
   :bind => '0.0.0.0',
 }
 
+store = Moneta.new(:Memory)
+
 class RubyDeps < Sinatra::Base
 
   include RubyDepsHelpers
 
+  before do
+    @store = settings.store
+  end
+
   get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
     repo_defined?(source, org, name)
-    Sidekiq.redis do |connection|
-      Redis::Objects.redis = connection
-    end
-    result = Redis::Value.new(@repo.identifier)
     content_type :json
-    result.value # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+    @store[@repo.identifier].to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
   end
 
   get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
@@ -58,7 +61,7 @@ class RubyDeps < Sinatra::Base
 
   post %r{/(.+)/(.+)/(.+)/refresh} do |source, org, name|
     repo_defined?(source, org, name)
-    if params[:token] == @repo.token
+    if @repo.token && params[:token] == @repo.token
       worker_fetch(@repo)
       status 200
     else
@@ -81,16 +84,18 @@ YAML.load(config).each do |source, orgs|
       cfg = settings.is_a?(Hash) ? settings : {}
       gem_class = Object.const_get("#{source.capitalize}Gem")
       gem = gem_class.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
-      gem.dependency_types = cfg['dependencies'].map {|dep| dep.to_sym} if cfg['dependencies'].is_a?(Array)
+      gem.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
       repositories["#{source}/#{org}/#{repo}"] = gem
     end
   end
 end
 
-puts "Running Sidekiq..."
+RubyDeps.set(:repositories, repositories)
+RubyDeps.set(:store, store)
+
+puts "Running Workers..."
 include RubyDepsHelpers
 worker_fetch_all(repositories.values)
 
 puts "Starting Sinatra..."
-RubyDeps.set(:repositories, repositories)
 RubyDeps.run!(options)

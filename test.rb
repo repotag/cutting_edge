@@ -1,37 +1,38 @@
 require File.expand_path('../lib/workers/dependency.rb', __FILE__)
 require File.expand_path('../lib/gems.rb', __FILE__)
-require 'redis'
-require 'redis-objects'
-require 'json'
+require 'moneta'
+require 'pp'
 
-Redis::Objects.redis = Redis.new
+# Mock Sinatra app which defines a store for us to use.
+class RubyDeps
+  def self.store
+    @store ||= Moneta.new(:Memory)
+  end
+end
 
+def print_gems(gems)
+  gems.each do |gem|
+    puts "#{gem.identifier}:"
+    pp ::RubyDeps.store[gem.identifier]
+  end
+end
+
+# Define some gems to fetch the dependencies of
 gollum = GithubGem.new('gollum', 'gollum')
 lib    = GithubGem.new('gollum', 'gollum-lib', 'gemspec.rb')
 rjgit  = GithubGem.new('repotag', 'rjgit', 'gemspec.rb')
 rails  = GithubGem.new('rails', 'rails')
-
 gems = [gollum, lib, rjgit, rails]
 
-gems.each do |gem|
-  Redis::Objects.redis.del(gem.identifier) # Clear the Redis store
-end
+# For illustration, print the output of the Moneta store for each gem -- they are all empty!
+print_gems(gems)
 
-gem_dependencies = gems.map do |gem|
-  val = Redis::Value.new(gem.identifier)
-  puts val.value # Nothing here yet
-  val
-end
-
+# Now actually fetch the data via some workers
 gems.each do |gem|
   DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location, gem.dependency_types)
 end
 
-sleep 12
+sleep 10 # Wait a bit for the workers to finish
 
-gem_dependencies.each do |val|
-  puts val.value # Yay, content!
-end
-
-puts JSON.parse(gem_dependencies.first.value).inspect # Yay, content!
-puts JSON.parse(gem_dependencies.last.value).inspect # Yay, content!
+# When we now print the contents of the moneta store for each gem, we will actually have data!
+print_gems(gems)

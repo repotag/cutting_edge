@@ -19,6 +19,7 @@ class DependencyWorker
     gemspec_results = get_results(gemspec_deps)
     gemfile_results = get_results(gemfile_deps)
     add_to_store(identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
+    GC.start
   end
 
   private

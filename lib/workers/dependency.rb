@@ -2,14 +2,17 @@ require 'gemnasium/parser'
 require 'rubygems'
 require 'http'
 require 'sucker_punch'
+require 'sinatra/logger'
 require 'moneta'
 require File.expand_path('../../versions.rb', __FILE__)
 
 class DependencyWorker
   include SuckerPunch::Job
   include VersionRequirementComparator
+  include ::SemanticLogger::Loggable
 
   def perform(identifier, gemspec_url, gemfile_url, dependency_types)
+    log_info "Running Worker!"
     @dependency_types = dependency_types
     gemspec_deps = gemspec(gemspec_url)
     gemfile_deps = gemfile(gemfile_url)
@@ -19,6 +22,10 @@ class DependencyWorker
   end
 
   private
+
+  def log_info(message)
+    logger.info(message) if ::RubyDeps.enable_logging
+  end
 
   def get_results(dependencies)
     if dependencies

@@ -1,10 +1,13 @@
 require File.expand_path('../gems.rb', __FILE__)
 require File.expand_path('../workers/dependency.rb', __FILE__)
 
+require 'sucker_punch'
 require 'sinatra'
+require 'sinatra/logger'
 require 'yaml'
 require 'json'
 require 'moneta'
+require 'rufus-scheduler'
 
 module RubyDepsHelpers
   def worker_fetch_all(repositories)
@@ -41,8 +44,9 @@ options = {
 store = Moneta.new(:Memory)
 
 class RubyDeps < Sinatra::Base
-
   include RubyDepsHelpers
+
+  logger filename: "#{settings.environment}.log", level: :trace
 
   before do
     @store = settings.store
@@ -90,10 +94,20 @@ YAML.load(config).each do |source, orgs|
   end
 end
 
+# Need to initialize the log like this once, because otherwise it only becomes available after the Sinatra app has received a request...
+::SemanticLogger.add_appender(file_name: "#{RubyDeps.environment}.log")
+
 RubyDeps.set(:repositories, repositories)
 RubyDeps.set(:store, store)
+RubyDeps.set(:enable_logging, true)
 
-puts "Running Workers..."
+puts "Scheduling Jobs..."
+scheduler = Rufus::Scheduler.new
+scheduler.every('1h') do
+  worker_fetch_all(repositories.values)
+end
+
+puts "Running Workers a first time..."
 include RubyDepsHelpers
 worker_fetch_all(repositories.values)
 

@@ -1,29 +1,36 @@
 require 'gemnasium/parser'
 require 'rubygems'
 require 'http'
-require 'sidekiq'
-require 'json'
-require 'redis-objects'
+require 'sucker_punch'
+require 'sinatra/logger'
+require 'moneta'
 require File.expand_path('../../versions.rb', __FILE__)
 
 class DependencyWorker
-  include Sidekiq::Worker
+  include SuckerPunch::Job
   include VersionRequirementComparator
+  include ::SemanticLogger::Loggable
 
   def perform(identifier, gemspec_url, gemfile_url, dependency_types)
+    log_info "Running Worker!"
     @dependency_types = dependency_types
     gemspec_deps = gemspec(gemspec_url)
     gemfile_deps = gemfile(gemfile_url)
     gemspec_results = get_results(gemspec_deps)
     gemfile_results = get_results(gemfile_deps)
-    add_to_redis(identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
+    add_to_store(identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
+    GC.start
   end
 
   private
 
+  def log_info(message)
+    logger.info(message) if ::RubyDeps.enable_logging
+  end
+
   def get_results(dependencies)
     if dependencies
-      dependencies.select! {|dep| @dependency_types.include?(dep.first.type.to_s)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
+      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
       results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => [], :unknown => []}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
@@ -49,12 +56,8 @@ class DependencyWorker
     }
   end
 
-  def add_to_redis(identifier, dependencies)
-    Sidekiq.redis do |connection|
-      Redis::Objects.redis = connection
-      store = Redis::Value.new(identifier)
-      store.value = dependencies.to_json
-    end
+  def add_to_store(identifier, dependencies)
+    ::RubyDeps.store[identifier] = dependencies
   end
 
   def gemfile(url)

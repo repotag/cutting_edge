@@ -6,9 +6,7 @@ require File.expand_path('../../versions.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)
 
 class DependencyWorker < GenericWorker
-  include ::SuckerPunch::Job
   include VersionRequirementComparator
-  include WorkerHelpers
 
   def perform(identifier, gemspec_url, gemfile_url, dependency_types)
     log_info 'Running Worker!'

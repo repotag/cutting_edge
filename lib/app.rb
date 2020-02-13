@@ -1,5 +1,6 @@
 require File.expand_path('../gems.rb', __FILE__)
 require File.expand_path('../workers/dependency.rb', __FILE__)
+require File.expand_path('../workers/badge.rb', __FILE__)
 
 require 'sucker_punch'
 require 'sinatra'
@@ -10,6 +11,16 @@ require 'moneta'
 require 'rufus-scheduler'
 
 module RubyDepsHelpers
+  def worker_all_badges(repositories)
+    repositories.each do |gem|
+      worker_generate_badge(gem)
+    end
+  end
+
+  def worker_generate_badge(gem)
+    BadgeWorker.perform_async(gem.identifier)
+  end
+
   def worker_fetch_all(repositories)
     repositories.each do |gem|
       worker_fetch(gem)
@@ -60,7 +71,8 @@ class RubyDeps < Sinatra::Base
 
   get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
     repo_defined?(source, org, name)
-    return 'YAY'
+    content_type 'image/svg+xml'
+    @store["svg-#{@repo.identifier}"]
   end
 
   post %r{/(.+)/(.+)/(.+)/refresh} do |source, org, name|
@@ -106,10 +118,16 @@ scheduler = Rufus::Scheduler.new
 scheduler.every('1h') do
   worker_fetch_all(repositories.values)
 end
+scheduler.every('1h5m') do
+  worker_all_badges(repositories.values)
+end
 
 puts "Running Workers a first time..."
 include RubyDepsHelpers
 worker_fetch_all(repositories.values)
+
+sleep 5
+worker_all_badges(repositories.values)
 
 puts "Starting Sinatra..."
 RubyDeps.run!(options)

@@ -1,37 +1,35 @@
 require 'gemnasium/parser'
 require 'rubygems'
 require 'http'
-require 'sucker_punch'
-require 'sinatra/logger'
 require 'moneta'
 require File.expand_path('../../versions.rb', __FILE__)
+require File.expand_path('../helpers.rb', __FILE__)
 
-class DependencyWorker
-  include SuckerPunch::Job
+class DependencyWorker < GenericWorker
+  include ::SuckerPunch::Job
   include VersionRequirementComparator
-  include ::SemanticLogger::Loggable
+  include WorkerHelpers
 
   def perform(identifier, gemspec_url, gemfile_url, dependency_types)
-    log_info "Running Worker!"
+    log_info 'Running Worker!'
     @dependency_types = dependency_types
     gemspec_deps = gemspec(gemspec_url)
     gemfile_deps = gemfile(gemfile_url)
     gemspec_results = get_results(gemspec_deps)
     gemfile_results = get_results(gemfile_deps)
-    add_to_store(identifier, {:gemspec => gemspec_results, :gemfile => gemfile_results})
+    stats = generate_stats([gemspec_results, gemfile_results])
+    total_results = {:gemspec => gemspec_results, :gemfile => gemfile_results}.merge(stats)
+    add_to_store(identifier, total_results)
     GC.start
   end
 
   private
 
-  def log_info(message)
-    logger.info(message) if ::RubyDeps.enable_logging
-  end
-
   def get_results(dependencies)
     if dependencies
       dependencies.select! {|dep| @dependency_types.include?(dep.first.type)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
-      results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => [], :unknown => []}
+      results = {}
+      status_types.each {|type| results[type] = []}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
         if is_outdated?(dep, latest_version)
@@ -47,6 +45,30 @@ class DependencyWorker
     end
   end
 
+  def generate_stats(locations)
+    results = {}
+    status_types.each do |type|
+      num = stats(type, locations)
+      results[type] = num
+      results[:outdated_total] = results[:outdated_total].to_i + num unless [:ok, :unknown].include?(type)
+      results[:outdated] = type if num > 0 && !results[:outdated]
+    end
+    results[:outdated] = :up_to_date unless results[:outdated]
+    results
+  end
+
+  def status_types
+    [:outdated_major, :outdated_minor, :outdated_bump, :ok, :unknown]
+  end
+
+  def stats(stat, locations)
+    sum = 0
+    locations.each do |loc|
+      sum = sum + loc[stat].length
+    end
+    sum
+  end
+
   def dependency(name, requirement, latest, type)
     {
       :name => name,
@@ -54,10 +76,6 @@ class DependencyWorker
       :latest => latest,
       :type => type
     }
-  end
-
-  def add_to_store(identifier, dependencies)
-    ::RubyDeps.store[identifier] = dependencies
   end
 
   def gemfile(url)
@@ -87,7 +105,7 @@ class DependencyWorker
   end
 
   def latest_version_spec(gem_name)
-    # Fancy todo: cache these in Redis
+    # Fancy todo: cache these?
     Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(gem_name, nil)).flatten.first
   end
 

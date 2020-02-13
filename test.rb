@@ -24,10 +24,10 @@ gem_dependencies = gems.map do |gem|
 end
 
 gems.each do |gem|
-  DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
+  DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location, gem.dependency_types)
 end
 
-sleep 20
+sleep 12
 
 gem_dependencies.each do |val|
   puts val.value # Yay, content!

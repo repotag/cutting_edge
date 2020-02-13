@@ -13,7 +13,7 @@ module RubyDepsHelpers
   end
 
   def worker_fetch(gem)
-    DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location)
+    DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location, gem.dependency_types)
   end
 end
 
@@ -25,6 +25,7 @@ github:
     gollum-lib:
       api_token: secret
       gemspec: gemspec.rb
+      dependency_types: [runtime, development]
 gitlab:
   cthowl01:
     team-chess-ruby:
@@ -80,6 +81,7 @@ YAML.load(config).each do |source, orgs|
       cfg = settings.is_a?(Hash) ? settings : {}
       gem_class = Object.const_get("#{source.capitalize}Gem")
       gem = gem_class.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      gem.dependency_types = cfg['dependencies'].map {|dep| dep.to_sym} if cfg['dependencies'].is_a?(Array)
       repositories["#{source}/#{org}/#{repo}"] = gem
     end
   end

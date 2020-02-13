@@ -10,7 +10,8 @@ class DependencyWorker
   include Sidekiq::Worker
   include VersionRequirementComparator
 
-  def perform(identifier, gemspec_url, gemfile_url)
+  def perform(identifier, gemspec_url, gemfile_url, dependency_types)
+    @dependency_types = dependency_types
     gemspec_deps = gemspec(gemspec_url)
     gemfile_deps = gemfile(gemfile_url)
     gemspec_results = get_results(gemspec_deps)
@@ -22,10 +23,10 @@ class DependencyWorker
 
   def get_results(dependencies)
     if dependencies
-      dependencies.select! {|dep| dep.first.type != :development}
+      dependencies.select! {|dep| @dependency_types.include?(dep.first.type.to_s)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
       results = {:outdated_major => [],  :outdated_minor => [], :outdated_bump => [], :ok => [], :unknown => []}
       dependencies.each do |dep, latest_version|
-        dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s)
+        dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
         if is_outdated?(dep, latest_version)
           outdated = version_requirement_diff(dep.requirement, latest_version.respond_to?(:last) ? latest_version.last : latest_version)
           results[outdated] << dependency_hash
@@ -39,11 +40,12 @@ class DependencyWorker
     end
   end
 
-  def dependency(name, requirement, latest)
+  def dependency(name, requirement, latest, type)
     {
       :name => name,
       :required => requirement,
-      :latest => latest
+      :latest => latest,
+      :type => type
     }
   end
 

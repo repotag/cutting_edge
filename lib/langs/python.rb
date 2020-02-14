@@ -4,10 +4,12 @@ require 'http'
 
 class PythonLang
   COMPARATORS = />=|>|<=|<|==/
-  VERSION_NUM = /\d[^,]*/
-  REGEX = /^([^,]+)\s*(#{COMPARATORS})\s*(#{VERSION_NUM})(\s*,\s*(#{COMPARATORS})\s*(#{VERSION_NUM}))?$/
+  VERSION_NUM = /\d[\.\w]*/
+  SUFFIX_OPTION = /\s*(\[.*\])?/
+  REGEX = /^([^,]+)\s*(#{COMPARATORS})\s*(#{VERSION_NUM})(\s*,\s*(#{COMPARATORS})\s*(#{VERSION_NUM}))?#{SUFFIX_OPTION}$/
 
   API_URL = 'https://pypi.org/pypi/'
+
   # Defaults for projects in this language
   def self.locations(name)
     ['requirements.txt']
@@ -22,7 +24,9 @@ class PythonLang
     return nil unless content
     results = []
     content.each_line do |line|
-      if line =~ COMPARATORS
+      if line =~ /^\s*-e/
+        # ignore 'editable' dependencies
+      elsif line =~ COMPARATORS
         match = line.match(REGEX)
         return nil unless match
         name, first_comp, first_version, _ignore, second_comp, second_version = match.captures

@@ -22,18 +22,19 @@ def print_gems(gems)
 end
 
 # Define some gems to fetch the dependencies of
-gollum = GithubGem.new('gollum', 'gollum')
-lib    = GithubGem.new('gollum', 'gollum-lib', 'gemspec.rb')
-rjgit  = GithubGem.new('repotag', 'rjgit', 'gemspec.rb')
-rails  = GithubGem.new('rails', 'rails')
-gems = [gollum, lib, rjgit, rails]
+gollum = GithubRepository.new('gollum', 'gollum')
+lib    = GithubRepository.new('gollum', 'gollum-lib', 'ruby', ['gemspec.rb', 'Gemfile'])
+rjgit  = GithubRepository.new('repotag', 'rjgit')
+rails  = GithubRepository.new('rails', 'rails')
+flask_dance  = GithubRepository.new('singingwolfboy', 'flask-dance', 'python')
+gems = [gollum, lib, rjgit, rails, flask_dance]
 
 # For illustration, print the output of the Moneta store for each gem -- they are all empty!
 print_gems(gems)
 
 # Now actually fetch the data via some workers
 gems.each do |gem|
-  DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location, gem.dependency_types)
+  DependencyWorker.perform_async(gem.identifier, gem.lang, gem.locations, gem.dependency_types)
 end
 
 sleep 10 # Wait a bit for the workers to finish

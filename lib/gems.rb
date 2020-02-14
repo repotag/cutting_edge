@@ -1,17 +1,23 @@
-class RepositoryGem
+require File.expand_path('../langs.rb', __FILE__)
+
+class Repository
 
   DEPENDENCY_TYPES = [:runtime] # Which dependency types to accept (default only :runtime, excludes :development).
+  DEFAULT_LANG = 'ruby'
 
-  attr_reader :token
+  attr_reader :token, :locations, :lang
   attr_accessor :dependency_types
 
-  def initialize(org, name, gemspec = nil, gemfile = nil, branch = nil, token = nil)
+  def initialize(org, name, lang = nil, locations = nil, branch = nil, token = nil)
     @org     = org
     @name    = name
-    @gemspec = gemspec || "#{name.downcase}.gemspec"
-    @gemfile = gemfile || 'Gemfile'
     @branch  = branch  || 'master'
     @token   = token
+    @lang    = lang || DEFAULT_LANG
+    @locations = {}
+    (locations || get_lang(@lang).locations(name)).each do |loc|
+      @locations[loc] = url_for_file(loc)
+    end
     @dependency_types = DEPENDENCY_TYPES
   end
 
@@ -19,47 +25,41 @@ class RepositoryGem
     ''
   end
 
-  def gemfile_location
-    puts 'Please implement me.'
-  end
-
-  def gemspec_location
-    puts 'Please implement me'
-  end
-
   def identifier
     File.join(source, @org, @name)
   end
+
+  def url_for_file(file)
+    file
+  end
+
+  private
+
+  def get_lang(lang)
+    Object.const_get("::#{lang.capitalize}Lang")
+  end
 end
 
-class GithubGem < RepositoryGem
+class GithubRepository < Repository
   HOST = 'https://raw.githubusercontent.com'
 
   def source
     'github'
   end
 
-  def gemfile_location
-    File.join(HOST, @org, @name, @branch, @gemfile)
-  end
-
-  def gemspec_location
-    File.join(HOST, @org, @name, @branch, @gemspec)
+  def url_for_file(file)
+    File.join(HOST, @org, @name, @branch, file)
   end
 end
 
-class GitlabGem < RepositoryGem
+class GitlabRepository < Repository
   HOST = 'https://gitlab.com/'
 
   def source
     'gitlab'
   end
 
-  def gemfile_location
-    File.join(HOST, @org, @name, 'raw', @branch, @gemfile)
-  end
-
-  def gemspec_location
-    File.join(HOST, @org, @name, 'raw', @branch, @gemspec)
+  def url_for_file(file)
+    File.join(HOST, @org, @name, @branch, file)
   end
 end

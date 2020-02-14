@@ -25,7 +25,7 @@ class Badge
     end
     number = Integer(num) rescue nil if num
 
-    svg = Victor::SVG.new width: BADGE_OPTIONS[status][:width], height: 32, template: :minimal
+    svg = Victor::SVG.new width: BADGE_OPTIONS[status][:width], height: 32, template: :html
 
     style = {
       stroke: '#d3d3d3',

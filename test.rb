@@ -8,6 +8,10 @@ class RubyDeps
   def self.store
     @store ||= Moneta.new(:Memory)
   end
+
+  def self.enable_logging
+    false
+  end
 end
 
 def print_gems(gems)

@@ -6,7 +6,8 @@ class PythonLang
   COMPARATORS = />=|>|<=|<|==/
   VERSION_NUM = /\d[\.\w]*/
   SUFFIX_OPTION = /\s*(\[.*\])?/
-  REGEX = /^([^,]+)\s*(#{COMPARATORS})\s*(#{VERSION_NUM})(\s*,\s*(#{COMPARATORS})\s*(#{VERSION_NUM}))?#{SUFFIX_OPTION}$/
+  NAME = /[^,]+/
+  REGEX = /^(#{NAME})\s*(#{COMPARATORS})\s*(#{VERSION_NUM})(\s*,\s*(#{COMPARATORS})\s*(#{VERSION_NUM}))?#{SUFFIX_OPTION}$/
 
   API_URL = 'https://pypi.org/pypi/'
 

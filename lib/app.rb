@@ -1,4 +1,4 @@
-require File.expand_path('../gems.rb', __FILE__)
+require File.expand_path('../repo.rb', __FILE__)
 require File.expand_path('../workers/dependency.rb', __FILE__)
 require File.expand_path('../workers/badge.rb', __FILE__)
 
@@ -12,23 +12,23 @@ require 'rufus-scheduler'
 
 module RubyDepsHelpers
   def worker_all_badges(repositories)
-    repositories.each do |gem|
-      worker_generate_badge(gem)
+    repositories.each do |repo|
+      worker_generate_badge(repo)
     end
   end
 
-  def worker_generate_badge(gem)
-    BadgeWorker.perform_async(gem.identifier)
+  def worker_generate_badge(repo)
+    BadgeWorker.perform_async(repo.identifier)
   end
 
   def worker_fetch_all(repositories)
-    repositories.each do |gem|
-      worker_fetch(gem)
+    repositories.each do |repo|
+      worker_fetch(repo)
     end
   end
 
-  def worker_fetch(gem)
-    DependencyWorker.perform_async(gem.identifier, gem.gemspec_location, gem.gemfile_location, gem.dependency_types)
+  def worker_fetch(repo)
+    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types)
   end
 end
 
@@ -39,8 +39,11 @@ github:
       api_token: secret
     gollum-lib:
       api_token: secret
-      gemspec: gemspec.rb
+      locations: [gemspec.rb]
       dependency_types: [runtime, development]
+  singingwolfboy:
+    flask-dance:
+      language: python
 gitlab:
   cthowl01:
     team-chess-ruby:
@@ -96,12 +99,11 @@ end
 repositories = {}
 YAML.load(config).each do |source, orgs|
   orgs.each do |org, value|
-    value.each do |repo, settings|
+    value.each do |name, settings|
       cfg = settings.is_a?(Hash) ? settings : {}
-      gem_class = Object.const_get("#{source.capitalize}Gem")
-      gem = gem_class.new(org, repo, cfg.fetch('gemspec', nil), cfg.fetch('gemfile', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
-      gem.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
-      repositories["#{source}/#{org}/#{repo}"] = gem
+      repo = Object.const_get("#{source.capitalize}Repository").new(org, name, cfg.fetch('lang', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
+      repositories["#{source}/#{org}/#{name}"] = repo
     end
   end
 end

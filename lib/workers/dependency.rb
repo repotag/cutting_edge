@@ -1,4 +1,3 @@
-require 'gemnasium/parser'
 require 'rubygems'
 require 'http'
 require 'moneta'
@@ -59,6 +58,7 @@ class DependencyWorker < GenericWorker
         results[:outdated] = type unless results[:outdated] || num == 0
       end
     end
+    results[:outdated] = :unknown if results[:outdated_total] == 0 && results[:ok] == 0
     results[:outdated] = :up_to_date unless results[:outdated]
     results
   end

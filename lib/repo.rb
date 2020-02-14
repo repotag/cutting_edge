@@ -60,6 +60,6 @@ class GitlabRepository < Repository
   end
 
   def url_for_file(file)
-    File.join(HOST, @org, @name, @branch, file)
+    File.join(HOST, @org, @name, 'raw', @branch, file)
   end
 end

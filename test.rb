@@ -1,5 +1,5 @@
 require File.expand_path('../lib/workers/dependency.rb', __FILE__)
-require File.expand_path('../lib/gems.rb', __FILE__)
+require File.expand_path('../lib/repo.rb', __FILE__)
 require 'moneta'
 require 'pp'
 

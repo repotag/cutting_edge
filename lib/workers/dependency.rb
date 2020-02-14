@@ -8,6 +8,10 @@ require File.expand_path('../helpers.rb', __FILE__)
 class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
+  # Order is significant for purposes of calculating results[:outdated]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_bump, :ok, :unknown]
+  OUTDATED_TYPES = STATUS_TYPES[0..-3]
+
   def perform(identifier, gemspec_url, gemfile_url, dependency_types)
     log_info 'Running Worker!'
     @dependency_types = dependency_types
@@ -27,7 +31,7 @@ class DependencyWorker < GenericWorker
     if dependencies
       dependencies.select! {|dep| @dependency_types.include?(dep.first.type)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
       results = {}
-      status_types.each {|type| results[type] = []}
+      STATUS_TYPES.each {|type| results[type] = []}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
         if is_outdated?(dep, latest_version)
@@ -45,18 +49,16 @@ class DependencyWorker < GenericWorker
 
   def generate_stats(locations)
     results = {}
-    status_types.each do |type|
+    STATUS_TYPES.each do |type|
       num = stats(type, locations)
       results[type] = num
-      results[:outdated_total] = results[:outdated_total].to_i + num unless [:ok, :unknown].include?(type)
-      results[:outdated] = type if num > 0 && !results[:outdated]
+      if OUTDATED_TYPES.include?(type)
+        results[:outdated_total] = results[:outdated_total].to_i + num
+        results[:outdated] = type unless results[:outdated] || num == 0
+      end
     end
     results[:outdated] = :up_to_date unless results[:outdated]
     results
-  end
-
-  def status_types
-    [:outdated_major, :outdated_minor, :outdated_bump, :ok, :unknown]
   end
 
   def stats(stat, locations)

@@ -22,6 +22,14 @@ class PythonLang
   # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
   def self.parse_file(name, content)
     return nil unless content
+    if name =~ /\.txt$/
+      self.parse_requirements(content)
+    elsif name == 'Pipfile'
+      self.parse_pipfile(content)
+    end
+  end
+
+  def self.parse_requirements(content)
     results = []
     content.each_line do |line|
       if line =~ /^\s*-e/
@@ -42,6 +50,10 @@ class PythonLang
       results << [dep, latest]
     end
     results
+  end
+
+  def self.parse_pipfile(content)
+    []
   end
 
   def self.latest_version(name)

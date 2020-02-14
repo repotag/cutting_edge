@@ -26,6 +26,8 @@ class PythonLang
         match = line.match(REGEX)
         return nil unless match
         name, first_comp, first_version, _ignore, second_comp, second_version = match.captures
+        first_comp = '=' if first_comp == '=='
+        second_comp = '=' if second_comp == '=='
         dep = Gem::Dependency.new(name, "#{first_comp} #{first_version}")
         dep.requirement.concat(["#{second_comp} #{second_version}"]) if second_comp && second_version
       else
@@ -44,7 +46,7 @@ class PythonLang
       json = JSON.parse(content)
       Gem::Version.new(json['info']['version']) if json['info']['version']
     else
-      nil
+      nil # Todo: error handling, timeouts
     end
   end
 end

@@ -33,9 +33,8 @@ class PythonLang
   def self.parse_requirements(content)
     results = []
     content.each_line do |line|
-      if line =~ /^\s*-e/
-        # ignore 'editable' dependencies
-      elsif line =~ COMPARATORS
+      next if line =~ /^\s*-e/ # ignore 'editable' dependencies
+      if line =~ COMPARATORS
         match = line.match(REGEX)
         return nil unless match
         name, first_comp, first_version, _ignore, second_comp, second_version = match.captures

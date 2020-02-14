@@ -19,6 +19,6 @@ end
 
 class GenericWorker
   include ::SuckerPunch::Job
-  include WorkerHelpers
+  include ::WorkerHelpers
   include ::SemanticLogger::Loggable
 end

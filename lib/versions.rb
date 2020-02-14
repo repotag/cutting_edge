@@ -19,7 +19,8 @@ module VersionRequirementComparator
       elsif !HIGHER_THAN.include?(comparator)
         Gem::Requirement.new("#{comparator} #{version.to_s}")
       end
-    end.compact
+    end
+    constraints.compact!
 
     segments.each_with_index do |_v, position|
       check_version = Gem::Version.new(segments[0..position].join('.'))

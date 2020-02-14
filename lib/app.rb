@@ -69,7 +69,7 @@ class RubyDeps < Sinatra::Base
   get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
     repo_defined?(source, org, name)
     content_type :json
-    @store[@repo.identifier].to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+    @store[@repo.identifier].merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
   end
 
   get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
@@ -101,7 +101,7 @@ YAML.load(config).each do |source, orgs|
   orgs.each do |org, value|
     value.each do |name, settings|
       cfg = settings.is_a?(Hash) ? settings : {}
-      repo = Object.const_get("#{source.capitalize}Repository").new(org, name, cfg.fetch('lang', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      repo = Object.const_get("#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
       repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
       repositories["#{source}/#{org}/#{name}"] = repo
     end

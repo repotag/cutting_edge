@@ -29,10 +29,10 @@ class DependencyWorker < GenericWorker
   private
 
   def get_results(dependencies)
+    results = {}
+    STATUS_TYPES.each {|type| results[type] = []}
     if dependencies
-      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
-      results = {}
-      STATUS_TYPES.each {|type| results[type] = []}
+      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
         if is_outdated?(dep, latest_version)
@@ -42,10 +42,8 @@ class DependencyWorker < GenericWorker
           results[:ok] << dependency_hash
         end 
       end
-      results
-    else
-      []
     end
+    results
   end
 
   def generate_stats(locations)

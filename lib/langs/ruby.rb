@@ -1,4 +1,5 @@
 require 'gemnasium/parser'
+require 'rubygems'
 
 class RubyLang
 
@@ -13,6 +14,7 @@ class RubyLang
   #
   # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
   def self.parse_file(name, content)
+    return nil unless content
     if name =~ /gemspec/
       parse_gemspec(content)
     else

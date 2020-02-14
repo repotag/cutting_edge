@@ -46,8 +46,7 @@ class PythonLang
         name = line.strip
         dep = Gem::Dependency.new(name)
       end
-      latest = latest_version(name)
-      results << [dep, latest]
+      results << [dep, latest_version(name)]
     end
     results
   end
@@ -58,11 +57,10 @@ class PythonLang
 
   def self.latest_version(name)
     content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
-    if content
-      json = JSON.parse(content)
-      Gem::Version.new(json['info']['version']) if json['info']['version']
-    else
-      nil # Todo: error handling, timeouts
+    begin
+      Gem::Version.new(JSON.parse(content)['info']['version'])
+    rescue
+      nil
     end
   end
 end

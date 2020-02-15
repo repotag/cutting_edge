@@ -1,8 +1,10 @@
-require 'coveralls'
-Coveralls.wear!
-
 require 'simplecov'
 SimpleCov.start
+
+if ENV['TRAVIS']
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 load File.expand_path('../../lib/app.rb', __FILE__)
 RubyDeps.set(:enable_logging, false)

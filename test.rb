@@ -2,6 +2,7 @@ require File.expand_path('../lib/workers/dependency.rb', __FILE__)
 require File.expand_path('../lib/repo.rb', __FILE__)
 require 'moneta'
 require 'pp'
+require 'sinatra/logger'
 
 # Mock Sinatra app which defines a store for us to use.
 class RubyDeps
@@ -10,7 +11,7 @@ class RubyDeps
   end
 
   def self.enable_logging
-    false
+    true
   end
 end
 
@@ -20,6 +21,8 @@ def print_gems(gems)
     pp ::RubyDeps.store[gem.identifier]
   end
 end
+
+::SemanticLogger.add_appender(file_name: 'development.log')
 
 # Define some gems to fetch the dependencies of
 gollum = GithubRepository.new('gollum', 'gollum')

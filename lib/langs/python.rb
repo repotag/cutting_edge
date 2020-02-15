@@ -2,7 +2,7 @@ require 'rubygems'
 require 'json'
 require 'http'
 
-class PythonLang
+class PythonLang < Language
   COMPARATORS = />=|>|<=|<|==/
   VERSION_NUM = /\d[\.\w]*/
   SUFFIX_OPTION = /\s*(\[.*\])?/
@@ -12,8 +12,6 @@ class PythonLang
   API_URL = 'https://pypi.org/pypi/'
 
   class << self
-
-    include LanguageHelpers
 
     # Defaults for projects in this language
     def locations(name)
@@ -68,7 +66,8 @@ class PythonLang
       content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
       begin
         Gem::Version.new(JSON.parse(content)['info']['version'])
-      rescue
+      rescue StandardError => e
+        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e}")
         nil
       end
     end

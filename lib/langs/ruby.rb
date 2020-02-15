@@ -1,11 +1,9 @@
 require 'gemnasium/parser'
 require 'rubygems'
 
-class RubyLang
+class RubyLang < Language
 
   class << self
-
-    include LanguageHelpers
 
     # Defaults for projects in this language
     def locations(name)
@@ -26,7 +24,12 @@ class RubyLang
 
     def latest_version(name)
       # Fancy todo: cache these?
-      Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(name, nil)).flatten.first.version
+      begin
+        Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(name, nil)).flatten.first.version
+      rescue StandardError => e
+        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e}")
+        nil
+      end
     end
 
     def parse_ruby(type, content)

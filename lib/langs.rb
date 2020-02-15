@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'sinatra/logger'
 
 module LanguageHelpers
   # Return a mock construct that mimicks Gem::Dependency for depedencies we tried to parse, but weren't valid.
@@ -16,6 +17,15 @@ module LanguageHelpers
       [dependency, dependency.requirement.to_s == 'unknown' ? nil : latest_version(dependency.name)]
     end
   end
+
+  def log_error(message)
+    logger.error(message) if ::RubyDeps.enable_logging
+  end
+end
+
+class Language
+  include ::SemanticLogger::Loggable
+  extend LanguageHelpers
 end
 
 Dir[File.expand_path('../langs/*.rb', __FILE__)].each { |f| require f }

@@ -35,7 +35,7 @@ class DependencyWorker < GenericWorker
       dependencies.select! {|dep| @dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
-        if latest_version.nil?
+        if latest_version.nil? || dependency_hash[:required] == 'unknown'
           results[:unknown] << dependency_hash
         elsif is_outdated?(dep, latest_version)
           outdated = version_requirement_diff(dep.requirement, latest_version.respond_to?(:last) ? latest_version.last : latest_version)

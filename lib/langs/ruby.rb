@@ -3,41 +3,42 @@ require 'rubygems'
 
 class RubyLang
 
-  # Defaults for projects in this language
-  def self.locations(name)
-    ["#{name}.gemspec", 'Gemfile']
-  end
+  class << self
 
-  # Find the latest versions of gems in this gemspec
-  #
-  # content - String contents of the gemspec
-  #
-  # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
-  def self.parse_file(name, content)
-    return nil unless content
-    if name =~ /gemspec/
-      parse_gemspec(content)
-    else
-      parse_gemfile(content)
+    include LanguageHelpers
+
+    # Defaults for projects in this language
+    def locations(name)
+      ["#{name}.gemspec", 'Gemfile']
     end
-  end
 
-  def self.latest_version(name)
-    # Fancy todo: cache these?
-    Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(name, nil)).flatten.first
-  end
-
-  def self.parse_ruby(type, content)
-    Gemnasium::Parser.send(type, content).dependencies.map do |dep|
-      [dep, latest_version(dep.name).version]
+    # Parse a dependency file
+    #
+    # name - String contents of the file
+    # content - String contents of the file
+    #
+    # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
+    def parse_file(name, content)
+      return nil unless content
+      results = name =~ /gemspec/ ? parse_gemspec(content) : parse_gemfile(content)
+      dependency_with_latest(results)
     end
-  end
 
-  def self.parse_gemspec(content)
-    parse_ruby(:gemspec, content)
-  end
+    def latest_version(name)
+      # Fancy todo: cache these?
+      Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(name, nil)).flatten.first.version
+    end
 
-  def self.parse_gemfile(content)
-    parse_ruby(:gemfile, content)
+    def parse_ruby(type, content)
+      Gemnasium::Parser.send(type, content).dependencies
+    end
+
+    def parse_gemspec(content)
+      parse_ruby(:gemspec, content)
+    end
+
+    def parse_gemfile(content)
+      parse_ruby(:gemfile, content)
+    end
   end
 end

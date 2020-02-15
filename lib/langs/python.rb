@@ -11,56 +11,66 @@ class PythonLang
 
   API_URL = 'https://pypi.org/pypi/'
 
-  # Defaults for projects in this language
-  def self.locations(name)
-    ['requirements.txt']
-  end
+  class << self
 
-  # Find the latest versions of gems in this gemspec
-  #
-  # content - String contents of the gemspec
-  #
-  # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
-  def self.parse_file(name, content)
-    return nil unless content
-    if name =~ /\.txt$/
-      self.parse_requirements(content)
-    elsif name == 'Pipfile'
-      self.parse_pipfile(content)
+    include LanguageHelpers
+
+    # Defaults for projects in this language
+    def locations(name)
+      ['requirements.txt']
     end
-  end
 
-  def self.parse_requirements(content)
-    results = []
-    content.each_line do |line|
-      next if line =~ /^\s*-e/ # ignore 'editable' dependencies
-      if line =~ COMPARATORS
-        match = line.match(REGEX)
-        return nil unless match
-        name, first_comp, first_version, _ignore, second_comp, second_version = match.captures
-        first_comp = '=' if first_comp == '=='
-        second_comp = '=' if second_comp == '=='
-        dep = Gem::Dependency.new(name, "#{first_comp} #{first_version}")
-        dep.requirement.concat(["#{second_comp} #{second_version}"]) if second_comp && second_version
-      else
-        name = line.strip
-        dep = Gem::Dependency.new(name)
+    # Parse a dependency file
+    #
+    # name - String contents of the file
+    # content - String contents of the file
+    #
+    # Returns an Array of tuples of each dependency and its latest version: [[<Gem::Dependency>, <Gem::Version>]]
+    def parse_file(name, content)
+      return nil unless content
+      if name =~ /\.txt$/
+        results = parse_requirements(content)
+      elsif name =~ /Pipfile/
+        results = parse_pipfile(content)
       end
-      results << [dep, latest_version(name)]
+      dependency_with_latest(results) if results
     end
-    results
-  end
 
-  def self.parse_pipfile(content)
-    []
-  end
+    def parse_requirements(content)
+      results = []
+      content.each_line do |line|
+        next if line =~ /^\s*-e/ # ignore 'editable' dependencies
+        if line =~ COMPARATORS
+          next unless match = line.match(REGEX) # Skip this line if it doesn't conform to our expectations
+          name, first_comp, first_version, _ignore, second_comp, second_version = match.captures
+          first_comp = '=' if first_comp == '=='
+          second_comp = '=' if second_comp == '=='
+          dep = Gem::Dependency.new(name, "#{first_comp} #{first_version}")
+          dep.requirement.concat(["#{second_comp} #{second_version}"]) if second_comp && second_version
+        else
+          dep = Gem::Dependency.new(line.strip) # requries version to be >= 0
+        end
+        results << dep
+      end
+      results
+    end
 
-  def self.latest_version(name)
-    content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
-    begin
-      Gem::Version.new(JSON.parse(content)['info']['version'])
-    rescue
-      nil
+    def parse_pipfile(content)
+      []
+    end
+
+    # Find the latest versions of a dependency by name
+    #
+    # name - String name of the dependency
+    #
+    # Returns a Gem::Version
+    def latest_version(name)
+      content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
+      begin
+        Gem::Version.new(JSON.parse(content)['info']['version'])
+      rescue
+        nil
+      end
     end
   end
 end

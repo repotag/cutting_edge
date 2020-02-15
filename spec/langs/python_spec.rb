@@ -79,7 +79,11 @@ describe PythonLang do
       bar = result.find {|r| r.first.name == 'bar'}
       baz = result.find {|r| r.first.name == 'baz'}
 
-      expect(foo.first.requirement.to_s).to eq '< 0.5.0, >= 0.6'
+      foo_req = foo.first.requirement.to_s.split(',')
+      foo_req.map! {|r| r.strip}
+      expect(foo_req).to include('< 0.5.0')
+      expect(foo_req).to include('>= 0.6')
+
       expect(bar.first.requirement.to_s).to eq '~> 0.2'
       expect(baz.first.requirement.to_s).to eq '~> 0.3.0'
     end

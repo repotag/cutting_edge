@@ -1,8 +1,12 @@
 require 'rubygems'
 require 'json'
 require 'http'
+require 'toml-rb'
+require 'pp'
 
 class PythonLang < Language
+  # For Requirements.txt
+  # See https://iscompatible.readthedocs.io/en/latest/
   COMPARATORS = />=|>|<=|<|==/
   VERSION_NUM = /\d[\.\w]*/
   SUFFIX_OPTION = /\s*(\[.*\])?/
@@ -14,7 +18,7 @@ class PythonLang < Language
   class << self
 
     # Defaults for projects in this language
-    def locations(name)
+    def locations(name = nil)
       ['requirements.txt']
     end
 
@@ -54,7 +58,32 @@ class PythonLang < Language
     end
 
     def parse_pipfile(content)
-      []
+      begin
+        config = TomlRB.parse(content)
+      rescue TomlRB::ParseError => e
+        log_error("Encountered error when parsing Pipfile: #{e.class} #{e.message}")
+        return []
+      end    
+      config.select! {|k,v| ['packages', 'dev-packages'].include?(k)}
+      results = []
+
+      config.each do |type, packages|
+        packages.each do |name, info|
+          requirement = info.is_a?(String) ? info : info.fetch('version', nil)
+          if requirement
+            requirements = requirement.split(',').map {|req| translate_requirement(req)}
+            begin
+              results << Gem::Dependency.new(name, requirements, get_type(type))
+            rescue StandardError => e
+              log_error("Encountered error when parsing Pipfile requirement #{requirements}: #{e.class} #{e.message}")             
+              next
+            end
+          else
+            results << unknown_dependency(name, get_type(type))
+          end
+        end
+      end
+      results
     end
 
     # Find the latest versions of a dependency by name
@@ -65,11 +94,56 @@ class PythonLang < Language
     def latest_version(name)
       content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
       begin
-        Gem::Version.new(JSON.parse(content)['info']['version'])
+        v = JSON.parse(content)['info']['version']
+        Gem::Version.new(canonical_version(v))
       rescue StandardError => e
-        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e}")
+        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
       end
     end
+
+    private
+
+    def get_type(type)
+      type == 'dev-packages' ? :development : :runtime
+    end
+
+    def canonical_version(v)
+      case v
+      when /^\./
+        "0#{v}"
+      else
+        v
+      end
+    end
+
+    # Translate Pipfile syntax to a String or Array of Strings that Gem::Dependency.new understands
+    # See https://www.python.org/dev/peps/pep-0440/#version-matching
+    def translate_requirement(req)
+      req.sub!('~=', '~>')
+      req.sub!('==', '=')
+      case req
+      when '*'
+        '>= 0'
+      when /\.\*/
+        if req =~ /!=/
+          # Turn != 1.1.* into >= 1.2 OR < 1.1
+          req.sub!('.*', '.0')
+          req.sub!('!=', '')
+          v = Gem::Version.new(req) # Create the bump version using Gem::Version so pre-release handing will work
+          lower_bound = ">= #{v.bump.version}"
+          upper_bound = "< #{v.version}"
+          [lower_bound, upper_bound]
+        else
+          # Turn =1.1.* into ~> 1.1.0
+          req.sub!('=', '~>')
+          req.sub!('.*', '.0')
+          req
+        end
+      else
+        req
+      end
+    end
+
   end
 end

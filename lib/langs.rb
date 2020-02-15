@@ -4,7 +4,7 @@ require 'sinatra/logger'
 module LanguageHelpers
   # Return a mock construct that mimicks Gem::Dependency for depedencies we tried to parse, but weren't valid.
   def unknown_dependency(name, type = :runtime)
-    OStruct.new(name: name, type: type, requirement: 'unknown')
+    OpenStruct.new(name: name, type: type, requirement: 'unknown')
   end
 
   # For each dependency, find its latest version and return the two together. Takes account of invalid or dependencies (see #unknown_dependency)
@@ -19,7 +19,7 @@ module LanguageHelpers
   end
 
   def log_error(message)
-    logger.error(message) if ::RubyDeps.enable_logging
+    logger.error(message) if defined?(RubyDeps) && ::RubyDeps.enable_logging
   end
 end
 

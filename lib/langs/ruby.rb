@@ -27,7 +27,7 @@ class RubyLang < Language
       begin
         Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(name, nil)).flatten.first.version
       rescue StandardError => e
-        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e}")
+        log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
       end
     end

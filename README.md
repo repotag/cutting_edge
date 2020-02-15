@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/repotag/rubydeps.svg?branch=master)](https://travis-ci.org/repotag/rubydeps) [![Coverage Status](https://coveralls.io/repos/github/repotag/rubydeps/badge.svg?branch=master)](https://coveralls.io/github/repotag/rubydeps?branch=master)
+
 # rubydeps
 
 ## Sinatra App

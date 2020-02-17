@@ -1,5 +1,11 @@
 require 'ostruct'
 require 'sinatra/logger'
+require 'toml-rb'
+require 'rubygems'
+
+class Gem::Dependency
+  TYPES = [:runtime, :development, :build]
+end
 
 module LanguageHelpers
   # Return a mock construct that mimicks Gem::Dependency for depedencies we tried to parse, but weren't valid.
@@ -28,11 +34,18 @@ class Language
   extend LanguageHelpers
 end
 
-module LanguageHelpers
+module LanguageVersionHelpers
+
   private
 
+  def canonical_version(version)
+    version.match(/^\./) ? "0#{version}" : version
+  end
+
   # Translate version requirement syntax to a String or Array of Strings that Gem::Dependency.new understands
+  # Pipfile and Cargo.toml files support * and ^ (wildcard and caret) requirements, which Ruby does not
   # See https://www.python.org/dev/peps/pep-0440/#version-matching
+  # And: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
   def translate_requirement(req, language)
     if language == :python
       req.sub!('~=', '~>')
@@ -42,43 +55,39 @@ module LanguageHelpers
       req = "^#{req}" unless req =~ /~|<|>|\*|\^|=/ # No comparators means caret requirement
     end
 
-    case req
-    when /\^/
-      # ^1.2.3  :=  >=1.2.3, <2.0.0
-      # ^1.2    :=  >=1.2.0, <2.0.0
-      # ^1      :=  >=1.0.0, <2.0.0
-      # ^0.2.3  :=  >=0.2.3, <0.3.0
-      # ^0.2    :=  >=0.2.0, <0.3.0
-      # ^0.0.3  :=  >=0.0.3, <0.0.4
-      # ^0.0    :=  >=0.0.0, <0.1.0
-      # ^0      :=  >=0.0.0, <1.0.0
-      # upper bound = take the left most non-zero digit and +1 it
-      req.sub!('^', '')
-      version = Gem::Version.new(req)
-      segments = version.version.split('.')
-      left_non_zero = segments.find_index {|seg| seg > 0} || segments.rindex {|seg| seg == 0} # Find the leftmost non-zero digit. If there is none, find the last 0.
-      segments[left_non_zero] += 1
-      upper_bound = segments.join('.')
-      [">= #{version.version}", "< #{upper_bound}"]
-    when '*'
-      '>= 0'
-    when /\.\*/
-      if req =~ /!=/
-        # Turn != 1.1.* into >= 1.2, < 1.1
-        req.sub!('.*', '.0')
-        req.sub!('!=', '')
-        v = Gem::Version.new(req) # Create the bumped version using Gem::Version so pre-release handing will work
-        lower_bound = ">= #{v.bump.version}"
-        upper_bound = "< #{v.version}"
-        [lower_bound, upper_bound]
+    begin
+      case req
+      when /\^/
+        # upper bound = take the left most non-zero digit and +1 it
+        req.sub!('^', '')
+        version = Gem::Version.new(req)
+        segments = version.version.split('.')
+        index = segments.find_index {|seg| seg.to_i > 0} # Find the leftmost non-zero digit.
+        index = segments.rindex {|seg| seg.to_i == 0} unless index # If there is none, find the last 0.
+        segments[index] = segments[index].to_i + 1
+        upper_bound = segments[0..index].join('.')
+        [">= #{version.version}", "< #{upper_bound}"]
+      when '*'
+        '>= 0'
+      when /\.\*/
+        if req =~ /!=/
+          # Turn != 1.1.* into >= 1.2, < 1.1
+          req.sub!('.*', '.0')
+          req.sub!('!=', '')
+          v = Gem::Version.new(req) # Create the bumped version using Gem::Version so pre-release handing will work
+          lower_bound = ">= #{v.bump.version}"
+          upper_bound = "< #{v.version}"
+          [lower_bound, upper_bound]
+        else
+          req.sub!('=', '~>') || req = "~> #{req}" # Turn =1.1.* or 1.1.* into ~> 1.1.*
+          req.sub!('.*', '.0') # Turn ~> 1.1.* into ~> 1.1.0
+          req
+        end
       else
-        # Turn =1.1.* into ~> 1.1.0
-        req.sub!('=', '~>')
-        req.sub!('.*', '.0')
         req
       end
-    else
-      req
+    rescue ArgumentError => e
+      nil
     end
   end
 
@@ -97,6 +106,7 @@ module LanguageHelpers
         requirement = info.fetch('version', nil) rescue info
         if requirement
           requirements = requirement.split(',').map {|req| translate_requirement(req, language)}
+          next if requirements.include?(nil) # If a sub-requirement failed to translate, skip this entire dependency.
           begin
             results << Gem::Dependency.new(name, requirements, dependency_type)
           rescue StandardError => e

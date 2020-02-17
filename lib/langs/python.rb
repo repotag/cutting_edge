@@ -1,8 +1,6 @@
 require 'rubygems'
 require 'json'
 require 'http'
-require 'toml-rb'
-require 'pp'
 
 class PythonLang < Language
   # For Requirements.txt
@@ -20,7 +18,7 @@ class PythonLang < Language
     :development => 'dev-packages'
   }
 
-  include LanguageHelpers
+  extend LanguageVersionHelpers
 
   class << self
 
@@ -38,7 +36,7 @@ class PythonLang < Language
     def parse_file(name, content)
       return nil unless content
       if name =~ /\.txt$/
-        results = parse_requirements(content) # requirements.txt agnostic about development/runtime dependencies
+        results = parse_requirements(content)
       elsif name =~ /Pipfile/
         results = parse_toml(content, PIPFILE_SECTIONS, :python)
       end
@@ -78,12 +76,6 @@ class PythonLang < Language
         log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
       end
-    end
-
-    private
-
-    def canonical_version(version)
-      version.match(/^\./) ? "0#{version}" : version
     end
 
   end

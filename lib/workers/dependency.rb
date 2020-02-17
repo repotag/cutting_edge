@@ -1,50 +1,51 @@
-require 'gemnasium/parser'
 require 'rubygems'
 require 'http'
 require 'moneta'
 require File.expand_path('../../versions.rb', __FILE__)
+require File.expand_path('../../langs.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)
 
 class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_bump, :ok, :unknown]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-3]
 
-  def perform(identifier, gemspec_url, gemfile_url, dependency_types)
+  def perform(identifier, lang, locations, dependency_types)
     log_info 'Running Worker!'
     @dependency_types = dependency_types
-    gemspec_deps = gemspec(gemspec_url)
-    gemfile_deps = gemfile(gemfile_url)
-    gemspec_results = get_results(gemspec_deps)
-    gemfile_results = get_results(gemfile_deps)
-    stats = generate_stats([gemspec_results, gemfile_results])
-    total_results = {:gemspec => gemspec_results, :gemfile => gemfile_results}.merge(stats)
-    add_to_store(identifier, total_results)
+    @lang = get_lang(lang)
+    dependencies = {}
+    locations.each do |name, url|
+      contents = http_get(url)
+      dependencies[name] = get_results(@lang.parse_file(name, contents))
+    end
+    dependencies.merge!(generate_stats(dependencies))
+    add_to_store(identifier, dependencies)
     GC.start
   end
 
   private
 
   def get_results(dependencies)
+    results = {}
+    STATUS_TYPES.each {|type| results[type] = []}
     if dependencies
-      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)} # dependency_types is passed as an Array of symbols, but this gets translated by Sidekiq to an Array of Strings.
-      results = {}
-      STATUS_TYPES.each {|type| results[type] = []}
+      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
-        if is_outdated?(dep, latest_version)
+        if latest_version.nil? || dependency_hash[:required] == 'unknown'
+          results[:unknown] << dependency_hash
+        elsif is_outdated?(dep, latest_version)
           outdated = version_requirement_diff(dep.requirement, latest_version.respond_to?(:last) ? latest_version.last : latest_version)
           results[outdated] << dependency_hash
         else
           results[:ok] << dependency_hash
         end 
       end
-      results
-    else
-      []
     end
+    results
   end
 
   def generate_stats(locations)
@@ -57,14 +58,15 @@ class DependencyWorker < GenericWorker
         results[:outdated] = type unless results[:outdated] || num == 0
       end
     end
+    results[:outdated] = :unknown if results[:outdated_total] == 0 && results[:ok] == 0
     results[:outdated] = :up_to_date unless results[:outdated]
     results
   end
 
   def stats(stat, locations)
     sum = 0
-    locations.each do |loc|
-      sum = sum + loc[stat].length
+    locations.each do |name, dependencies|
+      sum = sum + dependencies[stat].length
     end
     sum
   end
@@ -78,35 +80,13 @@ class DependencyWorker < GenericWorker
     }
   end
 
-  def gemfile(url)
-    return nil unless url
-    parse(:gemfile, http_get(url))
-  end
-
-  def gemspec(url)
-    return nil unless url
-    parse(:gemspec, http_get(url))
+  def get_lang(lang)
+    Object.const_get("#{lang.capitalize}Lang")
   end
 
   def http_get(url)
     # TODO: timeouts and exceptions
     HTTP.get(url).to_s 
-  end
-
-  # Find the latest versions of gems in this gemspec
-  #
-  # content - String contents of the gemspec
-  #
-  # Returns an Array of tuples of each dependency and its latest version: [[<Bundler::Dependency>, <Gem::Version>]]
-  def parse(type, content)
-    Gemnasium::Parser.send(type, content).dependencies.map do |dep|
-      [dep, latest_version_spec(dep.name).version]
-    end
-  end
-
-  def latest_version_spec(gem_name)
-    # Fancy todo: cache these?
-    Gem::SpecFetcher.fetcher.spec_for_dependency(Gem::Dependency.new(gem_name, nil)).flatten.first
   end
 
   def is_outdated?(dependency, latest_version)

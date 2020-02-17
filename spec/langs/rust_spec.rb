@@ -21,7 +21,7 @@ def test_translate_req(str)
   RustLang.send(:translate_requirement, str, :rust)
 end
 
-describe PythonLang do
+describe RustLang do
   it 'parses Cargo.toml' do
     results = RustLang.parse_file('Cargo.toml', CARGO)
     expect(results.length).to eq 9

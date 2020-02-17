@@ -15,6 +15,13 @@ class PythonLang < Language
 
   API_URL = 'https://pypi.org/pypi/'
 
+  PIPFILE_SECTIONS = {
+    :runtime => 'packages',
+    :development => 'dev-packages'
+  }
+
+  include LanguageHelpers
+
   class << self
 
     # Defaults for projects in this language
@@ -31,9 +38,9 @@ class PythonLang < Language
     def parse_file(name, content)
       return nil unless content
       if name =~ /\.txt$/
-        results = parse_requirements(content)
+        results = parse_requirements(content) # requirements.txt agnostic about development/runtime dependencies
       elsif name =~ /Pipfile/
-        results = parse_pipfile(content)
+        results = parse_toml(content, PIPFILE_SECTIONS, :python)
       end
       dependency_with_latest(results) if results
     end
@@ -57,35 +64,6 @@ class PythonLang < Language
       results
     end
 
-    def parse_pipfile(content)
-      begin
-        config = TomlRB.parse(content)
-      rescue TomlRB::ParseError => e
-        log_error("Encountered error when parsing Pipfile: #{e.class} #{e.message}")
-        return []
-      end    
-      config.select! {|k,v| ['packages', 'dev-packages'].include?(k)}
-      results = []
-
-      config.each do |type, packages|
-        packages.each do |name, info|
-          requirement = info.fetch('version', nil) rescue info
-          if requirement
-            requirements = requirement.split(',').map {|req| translate_requirement(req)}
-            begin
-              results << Gem::Dependency.new(name, requirements, get_type(type))
-            rescue StandardError => e
-              log_error("Encountered error when parsing Pipfile requirement #{requirements}: #{e.class} #{e.message}")             
-              next
-            end
-          else
-            results << unknown_dependency(name, get_type(type))
-          end
-        end
-      end
-      results
-    end
-
     # Find the latest versions of a dependency by name
     #
     # name - String name of the dependency
@@ -104,40 +82,8 @@ class PythonLang < Language
 
     private
 
-    def get_type(type)
-      type == 'dev-packages' ? :development : :runtime
-    end
-
     def canonical_version(version)
       version.match(/^\./) ? "0#{version}" : version
-    end
-
-    # Translate Pipfile syntax to a String or Array of Strings that Gem::Dependency.new understands
-    # See https://www.python.org/dev/peps/pep-0440/#version-matching
-    def translate_requirement(req)
-      req.sub!('~=', '~>')
-      req.sub!('==', '=')
-      case req
-      when '*'
-        '>= 0'
-      when /\.\*/
-        if req =~ /!=/
-          # Turn != 1.1.* into >= 1.2 OR < 1.1
-          req.sub!('.*', '.0')
-          req.sub!('!=', '')
-          v = Gem::Version.new(req) # Create the bumped version using Gem::Version so pre-release handing will work
-          lower_bound = ">= #{v.bump.version}"
-          upper_bound = "< #{v.version}"
-          [lower_bound, upper_bound]
-        else
-          # Turn =1.1.* into ~> 1.1.0
-          req.sub!('=', '~>')
-          req.sub!('.*', '.0')
-          req
-        end
-      else
-        req
-      end
     end
 
   end

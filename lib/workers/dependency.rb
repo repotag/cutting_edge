@@ -9,7 +9,7 @@ class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_bump, :ok, :unknown]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-3]
 
   def perform(identifier, lang, locations, dependency_types)

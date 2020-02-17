@@ -19,7 +19,7 @@ class PythonLang < Language
 
     # Defaults for projects in this language
     def locations(name = nil)
-      ['requirements.txt']
+      ['requirements.txt', 'Pipfile']
     end
 
     # Parse a dependency file
@@ -69,7 +69,7 @@ class PythonLang < Language
 
       config.each do |type, packages|
         packages.each do |name, info|
-          requirement = info.is_a?(String) ? info : info.fetch('version', nil)
+          requirement = info.fetch('version', nil) rescue info
           if requirement
             requirements = requirement.split(',').map {|req| translate_requirement(req)}
             begin
@@ -94,8 +94,8 @@ class PythonLang < Language
     def latest_version(name)
       content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
       begin
-        v = JSON.parse(content)['info']['version']
-        Gem::Version.new(canonical_version(v))
+        version = JSON.parse(content)['info']['version']
+        Gem::Version.new(canonical_version(version))
       rescue StandardError => e
         log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
@@ -108,13 +108,8 @@ class PythonLang < Language
       type == 'dev-packages' ? :development : :runtime
     end
 
-    def canonical_version(v)
-      case v
-      when /^\./
-        "0#{v}"
-      else
-        v
-      end
+    def canonical_version(version)
+      version.match(/^\./) ? "0#{version}" : version
     end
 
     # Translate Pipfile syntax to a String or Array of Strings that Gem::Dependency.new understands
@@ -130,7 +125,7 @@ class PythonLang < Language
           # Turn != 1.1.* into >= 1.2 OR < 1.1
           req.sub!('.*', '.0')
           req.sub!('!=', '')
-          v = Gem::Version.new(req) # Create the bump version using Gem::Version so pre-release handing will work
+          v = Gem::Version.new(req) # Create the bumped version using Gem::Version so pre-release handing will work
           lower_bound = ">= #{v.bump.version}"
           upper_bound = "< #{v.version}"
           [lower_bound, upper_bound]

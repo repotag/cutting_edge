@@ -39,8 +39,8 @@ EOF
 
 describe PythonLang do
   context 'requirements.txt' do
-    it 'default dependency file is requirements.txt' do
-      expect(PythonLang.locations).to eq ['requirements.txt']
+    it 'expects the default dependency files to be requirements.txt and Pipfile' do
+      expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
     end
 
     it 'parses requirements.txt' do

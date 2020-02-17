@@ -14,12 +14,10 @@ class DependencyWorker < GenericWorker
 
   def perform(identifier, lang, locations, dependency_types)
     log_info 'Running Worker!'
-    @dependency_types = dependency_types
-    @lang = get_lang(lang)
     dependencies = {}
     locations.each do |name, url|
       contents = http_get(url)
-      dependencies[name] = get_results(@lang.parse_file(name, contents))
+      dependencies[name] = get_results(get_lang(lang).parse_file(name, contents, dependency_types))
     end
     dependencies.merge!(generate_stats(dependencies))
     add_to_store(identifier, dependencies)
@@ -28,11 +26,11 @@ class DependencyWorker < GenericWorker
 
   private
 
-  def get_results(dependencies)
+  def get_results(dependencies, dependency_types)
     results = {}
     STATUS_TYPES.each {|type| results[type] = []}
     if dependencies
-      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)}
+      dependencies.select! {|dep| dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
         if dependency_hash[:required] == 'unknown'

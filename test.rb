@@ -5,13 +5,15 @@ require 'pp'
 require 'sinatra/logger'
 
 # Mock Sinatra app which defines a store for us to use.
-class CuttingEdge
-  def self.store
-    @store ||= Moneta.new(:Memory)
-  end
+module CuttingEdge
+  class App
+    def self.store
+      @store ||= Moneta.new(:Memory)
+    end
 
-  def self.enable_logging
-    true
+    def self.enable_logging
+      true
+    end
   end
 end
 

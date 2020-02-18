@@ -9,17 +9,15 @@ class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :unknown]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-3]
 
   def perform(identifier, lang, locations, dependency_types)
     log_info 'Running Worker!'
-    @dependency_types = dependency_types
-    @lang = get_lang(lang)
     dependencies = {}
     locations.each do |name, url|
       contents = http_get(url)
-      dependencies[name] = get_results(@lang.parse_file(name, contents))
+      dependencies[name] = get_results(get_lang(lang).parse_file(name, contents, dependency_types))
     end
     dependencies.merge!(generate_stats(dependencies))
     add_to_store(identifier, dependencies)
@@ -28,14 +26,16 @@ class DependencyWorker < GenericWorker
 
   private
 
-  def get_results(dependencies)
+  def get_results(dependencies, dependency_types)
     results = {}
     STATUS_TYPES.each {|type| results[type] = []}
     if dependencies
-      dependencies.select! {|dep| @dependency_types.include?(dep.first.type)}
+      dependencies.select! {|dep| dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|
         dependency_hash = dependency(dep.name, dep.requirement.to_s, latest_version.to_s, dep.type)
-        if latest_version.nil? || dependency_hash[:required] == 'unknown'
+        if dependency_hash[:required] == 'unknown'
+          results[:no_requirement] << dependency_hash
+        elsif latest_version.nil?
           results[:unknown] << dependency_hash
         elsif is_outdated?(dep, latest_version)
           outdated = version_requirement_diff(dep.requirement, latest_version.respond_to?(:last) ? latest_version.last : latest_version)

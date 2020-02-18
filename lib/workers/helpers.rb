@@ -4,7 +4,7 @@ require 'sucker_punch'
 module WorkerHelpers
 
   def log_info(message)
-    logger.info(message) if defined?(::CuttingEdge) && ::CuttingEdge::App.enable_logging
+    logger.info(message) if ::CuttingEdge::App.enable_logging
   end
 
   def add_to_store(identifier, dependencies)

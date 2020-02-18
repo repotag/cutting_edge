@@ -1,8 +1,5 @@
 require 'rubygems'
-require 'json'
 require 'http'
-require 'toml-rb'
-require 'pp'
 
 class PythonLang < Language
   # For Requirements.txt
@@ -14,6 +11,13 @@ class PythonLang < Language
   REGEX = /^(#{NAME})\s*(#{COMPARATORS})\s*(#{VERSION_NUM})(\s*,\s*(#{COMPARATORS})\s*(#{VERSION_NUM}))?#{SUFFIX_OPTION}$/
 
   API_URL = 'https://pypi.org/pypi/'
+
+  PIPFILE_SECTIONS = {
+    :runtime => 'packages',
+    :development => 'dev-packages'
+  }
+
+  extend LanguageVersionHelpers
 
   class << self
 
@@ -33,7 +37,7 @@ class PythonLang < Language
       if name =~ /\.txt$/
         results = parse_requirements(content)
       elsif name =~ /Pipfile/
-        results = parse_pipfile(content)
+        results = parse_toml(content, PIPFILE_SECTIONS)
       end
       dependency_with_latest(results) if results
     end
@@ -57,84 +61,38 @@ class PythonLang < Language
       results
     end
 
-    def parse_pipfile(content)
-      begin
-        config = TomlRB.parse(content)
-      rescue TomlRB::ParseError => e
-        log_error("Encountered error when parsing Pipfile: #{e.class} #{e.message}")
-        return []
-      end    
-      config.select! {|k,v| ['packages', 'dev-packages'].include?(k)}
-      results = []
-
-      config.each do |type, packages|
-        packages.each do |name, info|
-          requirement = info.fetch('version', nil) rescue info
-          if requirement
-            requirements = requirement.split(',').map {|req| translate_requirement(req)}
-            begin
-              results << Gem::Dependency.new(name, requirements, get_type(type))
-            rescue StandardError => e
-              log_error("Encountered error when parsing Pipfile requirement #{requirements}: #{e.class} #{e.message}")             
-              next
-            end
-          else
-            results << unknown_dependency(name, get_type(type))
-          end
-        end
-      end
-      results
-    end
-
     # Find the latest versions of a dependency by name
     #
     # name - String name of the dependency
     #
     # Returns a Gem::Version
     def latest_version(name)
-      content = HTTP.follow(max_hops: 1).get(::File.join(API_URL, name, 'json'))
       begin
-        version = JSON.parse(content)['info']['version']
+        content = HTTP.timeout(::CuttingEdge::LAST_VERSION_TIMEOUT).follow(max_hops: 1).get(::File.join(API_URL, name, 'json')).parse
+        version = content['info']['version']
         Gem::Version.new(canonical_version(version))
-      rescue StandardError => e
+      rescue StandardError, HTTP::TimeoutError => e
         log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
       end
     end
 
-    private
-
-    def get_type(type)
-      type == 'dev-packages' ? :development : :runtime
-    end
-
-    def canonical_version(version)
-      version.match(/^\./) ? "0#{version}" : version
-    end
-
-    # Translate Pipfile syntax to a String or Array of Strings that Gem::Dependency.new understands
+    # Translate version requirement syntax for Pipfiles to a String or Array of Strings that Gem::Dependency.new understands
+    # Pipfile support * and != requirements, which Ruby does not
     # See https://www.python.org/dev/peps/pep-0440/#version-matching
+    # 
+    # req - String version requirement
+    #
+    # Returns a translated String version requirement
     def translate_requirement(req)
-      req.sub!('~=', '~>')
-      req.sub!('==', '=')
+    req.sub!('~=', '~>')
+    req.sub!('==', '=')
       case req
-      when '*'
-        '>= 0'
-      when /\.\*/
-        if req =~ /!=/
-          # Turn != 1.1.* into >= 1.2 OR < 1.1
-          req.sub!('.*', '.0')
-          req.sub!('!=', '')
-          v = Gem::Version.new(req) # Create the bumped version using Gem::Version so pre-release handing will work
-          lower_bound = ">= #{v.bump.version}"
-          upper_bound = "< #{v.version}"
-          [lower_bound, upper_bound]
-        else
-          # Turn =1.1.* into ~> 1.1.0
-          req.sub!('=', '~>')
-          req.sub!('.*', '.0')
-          req
-        end
+      when /\*/
+        translate_wildcard(req)
+      when '!='
+        req.sub!('!=', '')
+        ["< #{req}", "> #{req}"]
       else
         req
       end

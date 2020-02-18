@@ -20,7 +20,7 @@ end
 def print_gems(gems)
   gems.each do |gem|
     puts "#{gem.identifier}:"
-    pp ::CuttingEdge.store[gem.identifier]
+    pp ::CuttingEdge::App.store[gem.identifier]
   end
 end
 

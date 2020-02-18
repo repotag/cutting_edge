@@ -17,7 +17,7 @@ class DependencyWorker < GenericWorker
     dependencies = {}
     locations.each do |name, url|
       contents = http_get(url)
-      dependencies[name] = get_results(get_lang(lang).parse_file(name, contents, dependency_types))
+      dependencies[name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
     end
     dependencies.merge!(generate_stats(dependencies))
     add_to_store(identifier, dependencies)
@@ -85,8 +85,12 @@ class DependencyWorker < GenericWorker
   end
 
   def http_get(url)
-    # TODO: timeouts and exceptions
-    HTTP.get(url).to_s 
+    begin
+      response = HTTP.get(url)
+      response.status == 200 ? response.to_s : nil
+    rescue HTTP::TimeoutError => e
+      log_info("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
+    end
   end
 
   def is_outdated?(dependency, latest_version)

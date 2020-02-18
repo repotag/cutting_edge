@@ -40,7 +40,7 @@ module VersionRequirementComparator
     when 1
       :outdated_minor
     else
-      :outdated_bump
+      :outdated_patch
     end
   end
 end

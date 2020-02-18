@@ -71,7 +71,8 @@ class PythonLang < Language
         content = HTTP.timeout(::CuttingEdge::LAST_VERSION_TIMEOUT).follow(max_hops: 1).get(::File.join(API_URL, name, 'json')).parse
         version = content['info']['version']
         Gem::Version.new(canonical_version(version))
-      rescue StandardError, HTTP::TimeoutError => e
+      #rescue StandardError, HTTP::TimeoutError => e
+    rescue StandardError
         log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
       end

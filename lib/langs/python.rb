@@ -67,8 +67,8 @@ class PythonLang < Language
     #
     # Returns a Gem::Version
     def latest_version(name)
+      begin
         content = HTTP.timeout(::CuttingEdge::LAST_VERSION_TIMEOUT).follow(max_hops: 1).get(::File.join(API_URL, name, 'json')).parse
-        begin
         version = content['info']['version']
         Gem::Version.new(canonical_version(version))
       rescue StandardError, HTTP::TimeoutError => e

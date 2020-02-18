@@ -1,4 +1,5 @@
 require 'langs.rb'
+require 'app.rb'
 
 REQUIREMENT_TXT = <<EOF
 requests>=2.0

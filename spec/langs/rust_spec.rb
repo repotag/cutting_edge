@@ -1,4 +1,5 @@
 require 'langs.rb'
+require 'app.rb'
 
 CARGO = <<EOF
 [dependencies]

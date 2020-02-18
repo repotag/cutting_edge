@@ -9,7 +9,7 @@ require 'json'
 require 'moneta'
 
 module CuttingEdge
-  LAST_VERSION_TIMEOUT = 10
+  LAST_VERSION_TIMEOUT = 5
 end
 
 module RubyDepsHelpers

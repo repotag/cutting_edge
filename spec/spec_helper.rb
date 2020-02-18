@@ -1,8 +1,8 @@
-require 'simplecov'
-
 if ENV['TRAVIS']
   require 'coveralls'
   Coveralls.wear!
+else
+  require 'simplecov'
 end
 
 require File.expand_path('../../lib/app.rb', __FILE__)

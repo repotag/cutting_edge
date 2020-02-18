@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/repotag/rubydeps.svg?branch=master)](https://travis-ci.org/repotag/rubydeps)
-[![Coverage Status](https://coveralls.io/repos/github/repotag/rubydeps/badge.svg)](https://coveralls.io/github/repotag/rubydeps)
+[![Build Status](https://travis-ci.org/repotag/cutting_edge.svg?branch=master)](https://travis-ci.org/repotag/cutting_edge)
+[![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg)](https://coveralls.io/github/repotag/cutting_edge)
 
 # CuttingEdge
 

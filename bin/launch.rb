@@ -17,6 +17,7 @@ github:
   rust-lang:
     crates.io:
       language: rust
+      api_token: secret
 gitlab:
   cthowl01:
     team-chess-ruby:

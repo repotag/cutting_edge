@@ -9,6 +9,7 @@ gem 'victor'
 gem 'rufus-scheduler'
 gem 'sinatra-logger', '>= 0.2.6'
 gem 'toml-rb'
+gem 'redis', require: false
 
 gem 'rspec', '~> 3.9', :group => :development
 gem 'simplecov', :group => :development

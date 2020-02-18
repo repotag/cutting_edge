@@ -14,6 +14,9 @@ github:
   singingwolfboy:
     flask-dance:
       language: python
+  rust-lang:
+    crates.io:
+      language: rust
 gitlab:
   cthowl01:
     team-chess-ruby:
@@ -32,7 +35,7 @@ YAML.load(config).each do |source, orgs|
   orgs.each do |org, value|
     value.each do |name, settings|
       cfg = settings.is_a?(Hash) ? settings : {}
-      repo = Object.const_get("#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
       repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
       repositories["#{source}/#{org}/#{name}"] = repo
     end

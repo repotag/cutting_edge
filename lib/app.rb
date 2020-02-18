@@ -8,7 +8,7 @@ require 'sinatra/logger'
 require 'json'
 require 'moneta'
 
-module RubyDepsHelpers
+module CuttingEdgeHelpers
   def worker_all_badges(repositories)
     repositories.each do |repo|
       worker_generate_badge(repo)
@@ -32,8 +32,8 @@ end
 
 
 
-class RubyDeps < Sinatra::Base
-  include RubyDepsHelpers
+class CuttingEdge < Sinatra::Base
+  include CuttingEdgeHelpers
 
   logger filename: "#{settings.environment}.log", level: :trace
 

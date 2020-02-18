@@ -40,11 +40,11 @@ YAML.load(config).each do |source, orgs|
 end
 
 # Need to initialize the log like this once, because otherwise it only becomes available after the Sinatra app has received a request...
-::SemanticLogger.add_appender(file_name: "#{RubyDeps.environment}.log")
+::SemanticLogger.add_appender(file_name: "#{CuttingEdge.environment}.log")
 
-RubyDeps.set(:repositories, repositories)
-RubyDeps.set(:store, store)
-RubyDeps.set(:enable_logging, true)
+CuttingEdge.set(:repositories, repositories)
+CuttingEdge.set(:store, store)
+CuttingEdge.set(:enable_logging, true)
 
 puts "Scheduling Jobs..."
 scheduler = Rufus::Scheduler.new
@@ -56,11 +56,11 @@ scheduler.every('1h5m') do
 end
 
 puts "Running Workers a first time..."
-include RubyDepsHelpers
+include CuttingEdgeHelpers
 worker_fetch_all(repositories.values)
 
 sleep 5
 worker_all_badges(repositories.values)
 
 puts "Starting Sinatra..."
-RubyDeps.run!(options)
+CuttingEdge.run!(options)

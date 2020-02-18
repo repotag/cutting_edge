@@ -13,4 +13,4 @@ gem 'toml-rb'
 gem 'rspec', '~> 3.9', :group => :development
 gem 'simplecov', :group => :development
 
-gem 'coveralls', require: false
+gem 'coveralls', '~>0.8.23', require: false

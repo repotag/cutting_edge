@@ -19,7 +19,7 @@ module LanguageHelpers
   end
 
   def log_error(message)
-    logger.error(message) if defined?(::RubyDeps) && ::RubyDeps.enable_logging
+    logger.error(message) if defined?(::CuttingEdge) && ::CuttingEdge::App.enable_logging
   end
 end
 

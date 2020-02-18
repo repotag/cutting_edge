@@ -5,20 +5,22 @@ require 'pp'
 require 'sinatra/logger'
 
 # Mock Sinatra app which defines a store for us to use.
-class RubyDeps
-  def self.store
-    @store ||= Moneta.new(:Memory)
-  end
+module CuttingEdge
+  class App
+    def self.store
+      @store ||= Moneta.new(:Memory)
+    end
 
-  def self.enable_logging
-    true
+    def self.enable_logging
+      true
+    end
   end
 end
 
 def print_gems(gems)
   gems.each do |gem|
     puts "#{gem.identifier}:"
-    pp ::RubyDeps.store[gem.identifier]
+    pp ::CuttingEdge::App.store[gem.identifier]
   end
 end
 

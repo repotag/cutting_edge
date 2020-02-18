@@ -8,6 +8,10 @@ require 'sinatra/logger'
 require 'json'
 require 'moneta'
 
+module CuttingEdge
+  LAST_VERSION_TIMEOUT = 5
+end
+
 module RubyDepsHelpers
   def worker_all_badges(repositories)
     repositories.each do |repo|

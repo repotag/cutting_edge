@@ -17,11 +17,15 @@ tempdir = "0.3"
 cc = "1.0.3"
 EOF
 
-def test_translate_req(str)
-  RustLang.send(:translate_requirement, str, :rust)
+def translate_req(str)
+  RustLang.send(:translate_requirement, str)
 end
 
 describe RustLang do
+  it 'expects the default dependency files to be Cargo.toml' do
+    expect(RustLang.locations).to eq ['Cargo.toml']
+  end
+
   it 'parses Cargo.toml' do
     results = RustLang.parse_file('Cargo.toml', CARGO)
     expect(results.length).to eq 9
@@ -53,27 +57,27 @@ describe RustLang do
       # ^0.0.3  :=  >=0.0.3, <0.0.4
       # ^0.0    :=  >=0.0.0, <0.1.0
       # ^0      :=  >=0.0.0, <1.0.0
-      expect(test_translate_req('^1.2.3')).to eq ['>= 1.2.3', '< 2']
-      expect(test_translate_req('^1.2')).to eq ['>= 1.2', '< 2']
-      expect(test_translate_req('^1')).to eq ['>= 1', '< 2']
-      expect(test_translate_req('^0.2.3')).to eq ['>= 0.2.3', '< 0.3']
-      expect(test_translate_req('^0.2')).to eq ['>= 0.2', '< 0.3']
-      expect(test_translate_req('^0.0.3')).to eq ['>= 0.0.3', '< 0.0.4']
-      expect(test_translate_req('^0.0')).to eq ['>= 0.0', '< 0.1']
-      expect(test_translate_req('^0')).to eq ['>= 0', '< 1']
+      expect(translate_req('^1.2.3')).to eq ['>= 1.2.3', '< 2']
+      expect(translate_req('^1.2')).to eq ['>= 1.2', '< 2']
+      expect(translate_req('^1')).to eq ['>= 1', '< 2']
+      expect(translate_req('^0.2.3')).to eq ['>= 0.2.3', '< 0.3']
+      expect(translate_req('^0.2')).to eq ['>= 0.2', '< 0.3']
+      expect(translate_req('^0.0.3')).to eq ['>= 0.0.3', '< 0.0.4']
+      expect(translate_req('^0.0')).to eq ['>= 0.0', '< 0.1']
+      expect(translate_req('^0')).to eq ['>= 0', '< 1']
     end
 
     it 'for the ~ operator' do
-      expect(test_translate_req('~1.2.3')). to eq '~>1.2.3'
+      expect(translate_req('~1.2.3')). to eq '~>1.2.3'
     end
 
     it 'for the * operator' do
       # *     := >=0.0.0         := >= 0
       # 1.*   := >=1.0.0, <2.0.0 := ~> 1.0
       # 1.2.* := >=1.2.0, <1.3.0 := ~> 1.2.0
-      expect(test_translate_req('*')).to eq '>= 0'
-      expect(test_translate_req('1.*')).to eq '~> 1.0'
-      expect(test_translate_req('1.2.*')).to eq '~> 1.2.0' # = 
+      expect(translate_req('*')).to eq '>= 0'
+      expect(translate_req('1.*')).to eq '~> 1.0'
+      expect(translate_req('1.2.*')).to eq '~> 1.2.0'
     end
   end
 end

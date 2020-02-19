@@ -55,11 +55,6 @@ def gemspec_file
   "#{name}.gemspec"
 end
 
-desc "Build the gem file."
-task :build do
-  system "gem build gollum_git_adapter_specs.gemspec"
-end
-
 def gem_file
   "#{name}-#{version}.gem"
 end

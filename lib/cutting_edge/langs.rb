@@ -1,7 +1,5 @@
 require 'ostruct'
-require 'sinatra/logger'
 require 'toml-rb'
-require 'rubygems'
 
 class Gem::Dependency
   TYPES = [:runtime, :development, :build]

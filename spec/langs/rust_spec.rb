@@ -1,6 +1,3 @@
-require 'langs.rb'
-require 'app.rb'
-
 CARGO = <<EOF
 [dependencies]
 log = { version = "0.4.*", features = ["std"] }

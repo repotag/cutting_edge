@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.name              = 'cutting_edge'
   s.version           = '0.0.1'
   s.date              = '2020-02-19'
-  s.license           = 'GPLv3.0'
+  s.license           = 'GPL-3.0-only'
 
   s.summary     = 'Self-hosted dependency monitoring, including shiny badges.'
   s.description = 'Self-hosted dependency monitoring, including shiny badges.'

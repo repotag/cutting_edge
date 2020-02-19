@@ -1,12 +1,14 @@
-require File.expand_path('../repo.rb', __FILE__)
-require File.expand_path('../workers/dependency.rb', __FILE__)
-require File.expand_path('../workers/badge.rb', __FILE__)
-
+require 'rubygems'
 require 'sucker_punch'
 require 'sinatra'
 require 'sinatra/logger'
 require 'json'
 require 'moneta'
+
+require File.expand_path('../../cutting_edge.rb', __FILE__)
+require File.expand_path('../repo.rb', __FILE__)
+require File.expand_path('../workers/dependency.rb', __FILE__)
+require File.expand_path('../workers/badge.rb', __FILE__)
 
 module CuttingEdgeHelpers
   def worker_all_badges(repositories)

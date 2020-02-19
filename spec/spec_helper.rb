@@ -5,7 +5,7 @@ if ENV['TRAVIS']
   Coveralls.wear!
 end
 
-require File.expand_path('../../lib/app.rb', __FILE__)
+require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 CuttingEdge::App.set(:enable_logging, false)
 ::SemanticLogger.add_appender(io: STDOUT)
 

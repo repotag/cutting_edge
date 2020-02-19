@@ -5,8 +5,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.4'
 
   s.name              = 'cutting_edge'
-  s.version           = '0'
-  s.date              = '2018-09-28'
+  s.version           = '0.0.1'
+  s.date              = '2020-02-19'
   s.license           = 'GPLv3.0'
 
   s.summary     = 'Self-hosted dependency monitoring, including shiny badges.'
@@ -29,4 +29,29 @@ Gem::Specification.new do |s|
   s.add_dependency 'rufus-scheduler', '~> 3.6'
   s.add_dependency 'sinatra-logger', '~> 0.3'
   s.add_dependency 'toml-rb', '~> 2.0'
+  # = MANIFEST =
+  s.files = %w[
+    Gemfile
+    LICENSE
+    README.md
+    Rakefile
+    bin/cutting_edge
+    cutting_edge.gemspec
+    lib/cutting_edge.rb
+    lib/cutting_edge/app.rb
+    lib/cutting_edge/badge.rb
+    lib/cutting_edge/langs.rb
+    lib/cutting_edge/langs/python.rb
+    lib/cutting_edge/langs/ruby.rb
+    lib/cutting_edge/langs/rust.rb
+    lib/cutting_edge/repo.rb
+    lib/cutting_edge/versions.rb
+    lib/cutting_edge/workers/badge.rb
+    lib/cutting_edge/workers/dependency.rb
+    lib/cutting_edge/workers/helpers.rb
+    spec/langs/python_spec.rb
+    spec/langs/rust_spec.rb
+    spec/spec_helper.rb
+  ]
+  # = MANIFEST =
 end

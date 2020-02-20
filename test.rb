@@ -1,5 +1,5 @@
-require File.expand_path('../lib/workers/dependency.rb', __FILE__)
-require File.expand_path('../lib/repo.rb', __FILE__)
+require File.expand_path('../lib/cutting_edge/workers/dependency.rb', __FILE__)
+require File.expand_path('../lib/cutting_edge/repo.rb', __FILE__)
 require 'moneta'
 require 'pp'
 require 'sinatra/logger'
@@ -27,11 +27,11 @@ end
 ::SemanticLogger.add_appender(file_name: 'development.log')
 
 # Define some gems to fetch the dependencies of
-gollum = GithubRepository.new('gollum', 'gollum')
-lib    = GithubRepository.new('gollum', 'gollum-lib', 'ruby', ['gemspec.rb', 'Gemfile'])
-rjgit  = GithubRepository.new('repotag', 'rjgit')
-rails  = GithubRepository.new('rails', 'rails')
-flask_dance  = GithubRepository.new('singingwolfboy', 'flask-dance', 'python')
+gollum = CuttingEdge::GithubRepository.new('gollum', 'gollum')
+lib    = CuttingEdge::GithubRepository.new('gollum', 'gollum-lib', 'ruby', ['gemspec.rb', 'Gemfile'])
+rjgit  = CuttingEdge::GithubRepository.new('repotag', 'rjgit')
+rails  = CuttingEdge::GithubRepository.new('rails', 'rails')
+flask_dance  = CuttingEdge::GithubRepository.new('singingwolfboy', 'flask-dance', 'python')
 gems = [gollum, lib, rjgit, rails, flask_dance]
 
 # For illustration, print the output of the Moneta store for each gem -- they are all empty!

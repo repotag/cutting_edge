@@ -22,7 +22,10 @@ module VersionRequirementComparator
     end
     constraints.compact!
 
+    puts constraints
+    puts segments.inspect
     segments.each_with_index do |_v, position|
+      puts _v
       check_version = Gem::Version.new(segments[0..position].join('.'))
       constraints.each do |constraint|
         unless constraint.satisfied_by?(check_version)

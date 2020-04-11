@@ -11,6 +11,9 @@ require File.expand_path('../workers/dependency.rb', __FILE__)
 require File.expand_path('../workers/badge.rb', __FILE__)
 
 module CuttingEdgeHelpers
+  
+  extend WorkerHelpers
+  
   def worker_all_badges(repositories)
     repositories.each do |repo|
       worker_generate_badge(repo)
@@ -18,7 +21,7 @@ module CuttingEdgeHelpers
   end
 
   def worker_generate_badge(repo)
-    BadgeWorker.perform_async(repo.identifier)
+    badge_worker(repo.identifier)
   end
 
   def worker_fetch_all(repositories)
@@ -35,6 +38,7 @@ end
 
 module CuttingEdge
    LAST_VERSION_TIMEOUT = 5
+   BADGE_WORK_QUEUE = 
   
   class App < Sinatra::Base
     include CuttingEdgeHelpers

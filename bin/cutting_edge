@@ -4,6 +4,8 @@ require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 require 'yaml'
 require 'rufus-scheduler'
 
+REFRESH_SCHEDULE = '1h'
+
 config = <<YAML
 github:
   gollum:
@@ -52,21 +54,15 @@ CuttingEdge::App.set(:repositories, repositories)
 CuttingEdge::App.set(:store, store)
 CuttingEdge::App.set(:enable_logging, true)
 
-puts "Scheduling Jobs..."
+puts 'Scheduling Jobs...'
 scheduler = Rufus::Scheduler.new
-scheduler.every('1h') do
+scheduler.every(REFRESH_SCHEDULE) do
   worker_fetch_all(repositories.values)
 end
-scheduler.every('1h5m') do
-  worker_all_badges(repositories.values)
-end
 
-puts "Running Workers a first time..."
+puts 'Running Workers a first time...'
 include CuttingEdgeHelpers
 worker_fetch_all(repositories.values)
 
-sleep 5
-worker_all_badges(repositories.values)
-
-puts "Starting Sinatra..."
+puts 'Starting Sinatra...'
 CuttingEdge::App.run!(options)

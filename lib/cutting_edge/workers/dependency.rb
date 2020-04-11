@@ -14,14 +14,19 @@ class DependencyWorker < GenericWorker
 
   def perform(identifier, lang, locations, dependency_types)
     log_info 'Running Worker!'
-    dependencies = {}
-    locations.each do |name, url|
-      contents = http_get(url)
-      dependencies[name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
+    old_dependencies = get_from_store(identifier)
+    begin
+      dependencies = {}
+      locations.each do |name, url|
+        contents = http_get(url)
+        dependencies[name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
+      end
+      dependencies.merge!(generate_stats(dependencies))
+      add_to_store(identifier, dependencies)
+    ensure
+      badge_worker(identifier)
+      GC.start
     end
-    dependencies.merge!(generate_stats(dependencies))
-    add_to_store(identifier, dependencies)
-    GC.start
   end
 
   private

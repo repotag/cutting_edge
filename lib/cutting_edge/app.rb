@@ -38,7 +38,6 @@ end
 
 module CuttingEdge
    LAST_VERSION_TIMEOUT = 5
-   BADGE_WORK_QUEUE = 
   
   class App < Sinatra::Base
     include CuttingEdgeHelpers

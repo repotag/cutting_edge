@@ -59,7 +59,7 @@ class DependencyWorker < GenericWorker
     STATUS_TYPES.each do |type|
       num = stats(type, locations)
       results[type] = num
-      if OUTDATED_TYPES.include?(type)
+      if outdated_type?(type)
         results[:outdated_total] = results[:outdated_total].to_i + num
         results[:outdated] = type unless results[:outdated] || num == 0
       end
@@ -103,5 +103,8 @@ class DependencyWorker < GenericWorker
   def is_outdated?(dependency, latest_version)
     !dependency.requirement.satisfied_by?(latest_version)
   end
-
+  
+  def outdated_type?(type)
+    OUTDATED_TYPES.include?(type)
+  end
 end

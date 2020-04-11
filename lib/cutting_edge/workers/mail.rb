@@ -7,9 +7,11 @@ module CuttingEdge
 end
 
 class MailWorker < GenericWorker
+  
   def perform(identifier, to_addr)
     log_info('Running Worker!')
-    html_body = generate_body(identifier)
+    dependencies = get_from_store(identifier)
+
     mail = Mail.new do
       from     CuttingEdge::App.settings[:email_from] || 'cutting_edge@localhost'
       to       to_addr
@@ -21,20 +23,15 @@ class MailWorker < GenericWorker
       
       html_part do
         content_type 'text/html; charset=UTF-8'
-        body html_body
+        body  ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
+          project_name: identifier,
+          url: 'http://127.0.0.1',
+          dependencies: dependencies
+        )
       end
     end
+    
+    puts mail.to_s
     mail.deliver!
-  end
-  
-  private
-  
-  def generate_body(identifier)
-    dependencies = get_from_store(identifier)
-    ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
-      project_name: identifier,
-      url: 'http://127.0.0.1',
-      dependencies: dependencies
-    )
   end
 end

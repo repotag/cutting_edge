@@ -10,7 +10,7 @@ class DependencyWorker < GenericWorker
 
   # Order is significant for purposes of calculating results[:outdated]
   STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
-  OUTDATED_TYPES = STATUS_TYPES[0..-3]
+  OUTDATED_TYPES = STATUS_TYPES[0..-4]
 
   def perform(identifier, lang, locations, dependency_types)
     log_info 'Running Worker!'

@@ -22,9 +22,10 @@ class DependencyWorker < GenericWorker
         dependencies[name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
       end
       dependencies.merge!(generate_stats(dependencies))
-      add_to_store(identifier, dependencies)
+      @nothing_changed = dependencies == old_dependencies
+      add_to_store(identifier, dependencies) unless @nothing_changed
     ensure
-      badge_worker(identifier)
+      badge_worker(identifier) unless @nothing_changed
       GC.start
     end
   end
@@ -67,7 +68,8 @@ class DependencyWorker < GenericWorker
     results[:outdated] = :up_to_date unless results[:outdated]
     results
   end
-
+  
+  # Add up the number of dependencies of type `stat` (e.g. :ok) in the different locations where dependencies are stored.
   def stats(stat, locations)
     sum = 0
     locations.each do |name, dependencies|

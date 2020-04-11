@@ -68,5 +68,9 @@ worker_fetch_all(repositories.values)
 sleep 5
 worker_all_badges(repositories.values)
 
+repo = repositories.values.first
+CuttingEdge::App.set(:settings, {:email_from => 'cutting_edge@mydomain.com'})
+MailWorker.perform_async(repo.identifier, 'd.ometto@gmail.com')
+
 puts "Starting Sinatra..."
 CuttingEdge::App.run!(options)

@@ -11,9 +11,13 @@ class MailWorker < GenericWorker
   def perform(identifier, to_addr)
     log_info('Running Worker!')
     dependencies = get_from_store(identifier)
+    unless to_addr && dependencies
+      log_info("Failed to execute email job for #{identifier}: #{dependencies ? dependencies : 'No dependencies found.'} #{'No e-mail address set.' if to_addr.nil?}")
+      return nil
+    end
 
-    mail = Mail.new do
-      from     CuttingEdge::App.settings[:email_from] || 'cutting_edge@localhost'
+    Mail.deliver do
+      from     CuttingEdge::MAIL_FROM
       to       to_addr
       subject  "Dependency Status Changed For #{identifier}"
       
@@ -25,13 +29,10 @@ class MailWorker < GenericWorker
         content_type 'text/html; charset=UTF-8'
         body  ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
           project_name: identifier,
-          url: 'http://127.0.0.1',
+          url: CuttingEdge::SERVER_URL,
           dependencies: dependencies
         )
       end
     end
-    
-    puts mail.to_s
-    mail.deliver!
   end
 end

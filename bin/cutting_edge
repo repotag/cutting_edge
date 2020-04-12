@@ -13,6 +13,7 @@ github:
       api_token: secret
       locations: [gemspec.rb]
       dependency_types: [runtime, development]
+      email: gollum@mydependencymonitoring.com
   singingwolfboy:
     flask-dance:
       language: python
@@ -23,6 +24,7 @@ github:
 gitlab:
   cthowl01:
     team-chess-ruby:
+      locations: [Gemfile]
       api_token: secret
 YAML
 
@@ -32,13 +34,20 @@ options = {
 }
 
 store = Moneta.new(:Memory)
+CuttingEdge::App.set(:store, store)
+
+module CuttingEdge
+  SERVER_URL = 'http://127.0.0.1' unless defined?(SERVER_URL)
+  MAIL_TO = false unless defined?(MAIL_TO) # Default address to send email to. If set to false, don't send any e-mails except for repositories that have their 'email' attribute set.
+  MAIL_FROM = "cutting_edge@#{SERVER_URL}" unless defined?(MAIL_FROM)
+end
 
 repositories = {}
 YAML.load(config).each do |source, orgs|
   orgs.each do |org, value|
     value.each do |name, settings|
       cfg = settings.is_a?(Hash) ? settings : {}
-      repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil))
+      repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
       repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
       repositories["#{source}/#{org}/#{name}"] = repo
     end
@@ -49,7 +58,6 @@ end
 ::SemanticLogger.add_appender(file_name: "#{CuttingEdge::App.environment}.log")
 
 CuttingEdge::App.set(:repositories, repositories)
-CuttingEdge::App.set(:store, store)
 CuttingEdge::App.set(:enable_logging, true)
 
 puts "Scheduling Jobs..."
@@ -68,9 +76,9 @@ worker_fetch_all(repositories.values)
 sleep 5
 worker_all_badges(repositories.values)
 
-repo = repositories.values.first
-CuttingEdge::App.set(:settings, {:email_from => 'cutting_edge@mydomain.com'})
-MailWorker.perform_async(repo.identifier, 'd.ometto@gmail.com')
+repositories.each do |name, repo|
+  MailWorker.perform_async(repo.identifier, repo.contact_email) if repo.contact_email
+end
 
 puts "Starting Sinatra..."
 CuttingEdge::App.run!(options)

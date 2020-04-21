@@ -58,10 +58,17 @@ describe MailWorker do
          :unknown=>0
     }
   }
-    
+  
+  before(:each) {
+    expect(worker).to receive(:get_from_store).with(identifier).and_return(dependencies)
+  }
+  
+  it 'returns nil when to address is nil ' do  
+    expect(worker.perform(identifier, nil)).to eq nil
+  end
+  
   it 'sends an update mail' do
     expect(Mail::TestMailer.deliveries).to be_empty
-    expect(worker).to receive(:get_from_store).with(identifier).and_return(dependencies)
     worker.perform(identifier, test_email)
     expect(Mail::TestMailer.deliveries).to_not be_empty
     

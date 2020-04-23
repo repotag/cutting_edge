@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 gem 'redis', require: false
 gem 'mail'
 
+gem 'hashdiff'
+
 gem 'rspec', '~> 3.9', :group => :development
 gem 'simplecov', :group => :development
 

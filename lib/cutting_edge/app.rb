@@ -13,18 +13,6 @@ require File.expand_path('../workers/mail.rb', __FILE__)
 
 module CuttingEdgeHelpers
   
-  extend WorkerHelpers
-  
-  def worker_all_badges(repositories)
-    repositories.each do |repo|
-      worker_generate_badge(repo)
-    end
-  end
-
-  def worker_generate_badge(repo)
-    badge_worker(repo.identifier)
-  end
-
   def worker_fetch_all(repositories)
     repositories.each do |repo|
       worker_fetch(repo)
@@ -32,7 +20,7 @@ module CuttingEdgeHelpers
   end
 
   def worker_fetch(repo)
-    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types)
+    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types, repo.contact_email)
   end
 end
 

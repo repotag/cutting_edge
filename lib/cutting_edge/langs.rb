@@ -1,5 +1,6 @@
 require 'ostruct'
 require 'toml-rb'
+require 'semantic_logger'
 
 class Gem::Dependency
   TYPES = [:runtime, :development, :build]

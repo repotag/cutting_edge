@@ -9,6 +9,7 @@ require File.expand_path('../../cutting_edge.rb', __FILE__)
 require File.expand_path('../repo.rb', __FILE__)
 require File.expand_path('../workers/dependency.rb', __FILE__)
 require File.expand_path('../workers/badge.rb', __FILE__)
+require File.expand_path('../workers/mail.rb', __FILE__)
 
 module CuttingEdgeHelpers
   
@@ -35,10 +36,14 @@ module CuttingEdgeHelpers
   end
 end
 
-
 module CuttingEdge
-   LAST_VERSION_TIMEOUT = 5
   
+  LAST_VERSION_TIMEOUT = 5
+  SERVER_HOST = 'localhost' unless defined?(SERVER_HOST)
+  SERVER_URL = "http://#{SERVER_HOST}" unless defined?(SERVER_URL)
+  MAIL_TO = false unless defined?(MAIL_TO) # Default address to send email to. If set to false, don't send any e-mails except for repositories that have their 'email' attribute set.
+  MAIL_FROM = "cutting_edge@#{SERVER_HOST}" unless defined?(MAIL_FROM)
+   
   class App < Sinatra::Base
     include CuttingEdgeHelpers
 

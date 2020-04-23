@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'http'
-require 'moneta'
 require File.expand_path('../../versions.rb', __FILE__)
 require File.expand_path('../../langs.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)

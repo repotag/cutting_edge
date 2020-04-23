@@ -8,55 +8,7 @@ describe MailWorker do
   let(:identifier) { 'github/repotag/cutting_edge' }
   let(:test_email) { 'cutting_edge@localhost' }
   let(:dependencies) {
-    {
-      'gollum.gemspec' =>
-        {:outdated_major=>
-          [{:name=>'mustache',
-            :required=>'>= 0.99.5, < 1.0.0',
-            :latest=>'1.1.1',
-            :type=>:runtime},
-           {:name=>'octicons',
-            :required=>'~> 8.5',
-            :latest=>'9.6.0',
-            :type=>:runtime}],
-         :outdated_minor=>
-          [{:name=>'kramdown-parser-gfm',
-            :required=>'~> 1.0.0',
-            :latest=>'1.1.0',
-            :type=>:runtime}],
-         :outdated_patch=>[],
-         :ok=>
-          [{:name=>'gollum-lib',
-            :required=>'~> 5.0',
-            :latest=>'5.0.3',
-            :type=>:runtime}],
-          :no_requirement=>[],
-          :unknown=>[]},
-       'Gemfile' =>
-          {
-           :outdated_major=>[
-              {
-                :name=>'rake',
-                :required=>'~> 12.3, >= 12.3.3',
-                :latest=>'13.0.1',
-                :type=>:runtime
-              }],
-           :outdated_minor=>[],
-           :outdated_patch=>[],
-           :ok=>
-            [{:name=>'warbler', :required=>'>= 0', :latest=>'2.0.5', :type=>:runtime}],
-           :no_requirement=>[],
-           :unknown=>[]
-         },
-         :outdated_major=>5,
-         :outdated_total=>17,
-         :outdated=>:outdated_major,
-         :outdated_minor=>1,
-         :outdated_patch=>0,
-         :ok=>11,
-         :no_requirement=>0,
-         :unknown=>0
-    }
+    mock_dependencies('gollum')
   }
   
   before(:each) {

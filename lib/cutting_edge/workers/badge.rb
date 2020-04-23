@@ -8,7 +8,6 @@ class BadgeWorker < GenericWorker
     dependencies = get_from_store(identifier)
     status = dependencies ? generate_status(dependencies[:outdated]) : :unknown
     add_to_store("svg-#{identifier}", Badge.build_badge(status, dependencies[:outdated_total]))
-    GC.start
   end
 
   private

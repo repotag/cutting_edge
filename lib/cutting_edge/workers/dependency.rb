@@ -11,7 +11,7 @@ class DependencyWorker < GenericWorker
   STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4]
 
-  def perform(identifier, lang, locations, dependency_types)
+  def perform(identifier, lang, locations, dependency_types, to_addr)
     log_info 'Running Worker!'
     old_dependencies = get_from_store(identifier)
     begin
@@ -24,7 +24,10 @@ class DependencyWorker < GenericWorker
       @nothing_changed = dependencies == old_dependencies
       add_to_store(identifier, dependencies) unless @nothing_changed
     ensure
-      badge_worker(identifier) unless @nothing_changed
+      unless @nothing_changed
+        badge_worker(identifier)
+        mail_worker(identifier, to_addr) if to_addr
+      end
       GC.start
     end
   end
@@ -95,7 +98,7 @@ class DependencyWorker < GenericWorker
       response = HTTP.get(url)
       response.status == 200 ? response.to_s : nil
     rescue HTTP::TimeoutError => e
-      log_info("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
+      log_info("Encountered error when fetching latest version of #{url}: #{e.class} #{e.message}")
     end
   end
 

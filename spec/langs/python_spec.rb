@@ -36,11 +36,11 @@ unittest2 = {version = ">=1.0,<3.0", markers="python_version < '2.7.9' or (pytho
 EOF
 
 describe PythonLang do
-  context 'requirements.txt' do
-    it 'expects the default dependency files to be requirements.txt and Pipfile' do
-      expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
-    end
+  it 'expects the default dependency files to be requirements.txt and Pipfile' do
+    expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
+  end
 
+  context 'requirements.txt' do
     it 'parses requirements.txt' do
       result = PythonLang.parse_file('requirements.txt', REQUIREMENT_TXT)
       expect(result).to be_a Array

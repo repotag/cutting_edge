@@ -14,6 +14,14 @@ module WorkerHelpers
   def get_from_store(identifier)
     ::CuttingEdge::App.store[identifier]
   end
+  
+  def badge_worker(identifier)
+    BadgeWorker.perform_async(identifier)
+  end
+  
+  def mail_worker(identifier, to_address)
+    MailWorker.perform_async(identifier, to_address)
+  end
 
 end
 

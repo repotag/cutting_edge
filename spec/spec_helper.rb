@@ -1,4 +1,5 @@
 require 'simplecov'
+require 'fixtures'
 
 if ENV['TRAVIS']
   require 'coveralls'

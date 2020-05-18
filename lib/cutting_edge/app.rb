@@ -12,16 +12,7 @@ require File.expand_path('../workers/badge.rb', __FILE__)
 require File.expand_path('../workers/mail.rb', __FILE__)
 
 module CuttingEdgeHelpers
-  def worker_all_badges(repositories)
-    repositories.each do |repo|
-      worker_generate_badge(repo)
-    end
-  end
-
-  def worker_generate_badge(repo)
-    BadgeWorker.perform_async(repo.identifier)
-  end
-
+  
   def worker_fetch_all(repositories)
     repositories.each do |repo|
       worker_fetch(repo)
@@ -29,11 +20,12 @@ module CuttingEdgeHelpers
   end
 
   def worker_fetch(repo)
-    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types)
+    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types, repo.contact_email)
   end
 end
 
 module CuttingEdge
+  
   LAST_VERSION_TIMEOUT = 5
   SERVER_HOST = 'localhost' unless defined?(SERVER_HOST)
   SERVER_URL = "http://#{SERVER_HOST}" unless defined?(SERVER_URL)

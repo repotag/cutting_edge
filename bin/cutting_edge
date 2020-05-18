@@ -4,11 +4,14 @@ require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 require 'yaml'
 require 'rufus-scheduler'
 
+REFRESH_SCHEDULE = '1h'
+
 config = <<YAML
 github:
   gollum:
     gollum:
       api_token: secret
+      email: false
     gollum-lib:
       api_token: secret
       locations: [gemspec.rb]
@@ -17,6 +20,7 @@ github:
   singingwolfboy:
     flask-dance:
       language: python
+      email: false
   rust-lang:
     crates.io:
       language: rust
@@ -54,25 +58,14 @@ end
 CuttingEdge::App.set(:repositories, repositories)
 CuttingEdge::App.set(:enable_logging, true)
 
-puts "Scheduling Jobs..."
+puts 'Scheduling Jobs...'
 scheduler = Rufus::Scheduler.new
-scheduler.every('1h') do
+scheduler.every(REFRESH_SCHEDULE) do
   worker_fetch_all(repositories.values)
 end
-scheduler.every('1h5m') do
-  worker_all_badges(repositories.values)
-end
 
-puts "Running Workers a first time..."
+puts 'Running Workers a first time...'
 include CuttingEdgeHelpers
 worker_fetch_all(repositories.values)
 
-sleep 5
-worker_all_badges(repositories.values)
-
-repositories.each do |name, repo|
-  MailWorker.perform_async(repo.identifier, repo.contact_email) if repo.contact_email
-end
-
-puts "Starting Sinatra..."
 CuttingEdge::App.run!(options)

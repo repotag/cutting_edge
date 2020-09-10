@@ -1,4 +1,3 @@
-require File.expand_path('../../badge.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)
 
 module CuttingEdge

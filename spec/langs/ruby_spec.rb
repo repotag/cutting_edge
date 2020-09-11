@@ -73,6 +73,14 @@ describe RubyLang do
   it 'expects the default dependency files to be gemspec and Gemfile' do
     expect(RubyLang.locations('test')).to eq ['test.gemspec', 'Gemfile']
   end
+  
+  it 'fetches latest version' do
+    expect(Gem::SpecFetcher.fetcher).to receive(:spec_for_dependency).and_return([])
+    RubyLang.latest_version('sinatra')
+    
+    allow(Gem::SpecFetcher).to receive(:fetcher).and_raise(StandardError)
+    expect(RubyLang.latest_version('fail')).to be_nil
+  end
 
   it 'parses gemspec' do
     expect(RubyLang).to receive(:latest_version).and_return(*gemspec_latest_versions.values)

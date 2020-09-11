@@ -62,6 +62,18 @@ describe PythonLang do
   it 'expects the default dependency files to be requirements.txt and Pipfile' do
     expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
   end
+  
+  it 'fetches latest version' do
+    mock = OpenStruct.new(
+      parse: {'info' => {'version' => '1.0.0'}}
+    )
+    allow_any_instance_of(HTTP::Client).to receive(:get).with('https://pypi.org/pypi/sinatra/json').and_return(mock)
+    expect(Gem::Version).to receive(:new).with('1.0.0').and_call_original
+    PythonLang.latest_version('sinatra')
+    
+    allow_any_instance_of(HTTP::Client).to receive(:get).and_raise(HTTP::Error)
+    expect(PythonLang.latest_version('fail')).to be_nil
+  end
 
   context 'requirements.txt' do
     it 'parses requirements.txt' do

@@ -36,6 +36,18 @@ describe RustLang do
   it 'expects the default dependency files to be Cargo.toml' do
     expect(RustLang.locations).to eq ['Cargo.toml']
   end
+  
+  it 'fetches latest version' do
+    mock = OpenStruct.new(
+      parse: {'crate' => {'max_version' => '1.0.0'}}
+    )
+    allow_any_instance_of(HTTP::Client).to receive(:get).with('https://crates.io/api/v1/crates/sinatra').and_return(mock)
+    expect(Gem::Version).to receive(:new).with('1.0.0').and_call_original
+    RustLang.latest_version('sinatra')
+    
+    allow_any_instance_of(HTTP::Client).to receive(:get).and_raise(HTTP::Error)
+    expect(RustLang.latest_version('fail')).to be_nil
+  end
 
   it 'parses Cargo.toml' do
     expect(RustLang).to receive(:latest_version).and_return(*rust_latest_versions.values)

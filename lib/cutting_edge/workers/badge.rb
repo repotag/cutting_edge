@@ -24,7 +24,7 @@ class BadgeWorker < GenericWorker
     add_to_store("svg-#{identifier}", ERB.new(CuttingEdge::BADGE_TEMPLATE).result_with_hash(
       base_width: ::CuttingEdge::BADGE_BASE_WIDTH,
       cell_width: ::CuttingEdge::BADGE_CELL_WIDTH,
-      colors: ::CuttingEdge::BADGE_COLORS,
+      colors: ::CuttingEdge::BADGE_LAYOUT,
       dependencies: dependencies
     ))
     GC.start

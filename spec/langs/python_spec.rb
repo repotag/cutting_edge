@@ -36,12 +36,48 @@ unittest2 = {version = ">=1.0,<3.0", markers="python_version < '2.7.9' or (pytho
 EOF
 
 describe PythonLang do
+  
+  let(:requirements_latest_versions) {
+    {
+      'requests': Gem::Version.new('2.24.0'),
+      'oauthlib': Gem::Version.new('3.1.0'),
+      'requests-oauthlib': Gem::Version.new('1.3.0'),
+      'Flask': Gem::Version.new('1.1.2'),
+      'urlobject': Gem::Version.new('2.4.3'),
+      'six': Gem::Version.new('1.15.0'),
+    }
+  }
+  let(:pipfile_latest_versions) {
+    {
+      'records': Gem::Version.new('0.5.3'),
+      'foo': Gem::Version.new('0.1'),
+      'bar': Gem::Version.new('0.2.1'),
+      'baz': Gem::Version.new('0.2.6'),
+      'pywinusb': Gem::Version.new('0.4.2'),
+      'nose': Gem::Version.new('1.3.7'),
+      'unittest2': Gem::Version.new('1.1.0')
+    }
+  }
+    
   it 'expects the default dependency files to be requirements.txt and Pipfile' do
     expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
+  end
+  
+  it 'fetches latest version' do
+    mock = OpenStruct.new(
+      parse: {'info' => {'version' => '1.0.0'}}
+    )
+    allow_any_instance_of(HTTP::Client).to receive(:get).with('https://pypi.org/pypi/sinatra/json').and_return(mock)
+    expect(Gem::Version).to receive(:new).with('1.0.0').and_call_original
+    PythonLang.latest_version('sinatra')
+    
+    allow_any_instance_of(HTTP::Client).to receive(:get).and_raise(HTTP::Error)
+    expect(PythonLang.latest_version('fail')).to be_nil
   end
 
   context 'requirements.txt' do
     it 'parses requirements.txt' do
+      expect(PythonLang).to receive(:latest_version).and_return(*requirements_latest_versions.values)
       result = PythonLang.parse_file('requirements.txt', REQUIREMENT_TXT)
       expect(result).to be_a Array
       expect(result.length).to eq 6
@@ -59,6 +95,8 @@ describe PythonLang do
     end
 
     it 'parses Pipefile' do
+      expect(PythonLang).to receive(:latest_version).and_return(*pipfile_latest_versions.values)
+
       result = PythonLang.parse_file('Pipfile', PIPFILE)
       expect(result).to be_a Array
 

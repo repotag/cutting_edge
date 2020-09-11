@@ -20,11 +20,38 @@ def translate_req(str)
 end
 
 describe RustLang do
+  let(:rust_latest_versions) {
+    {
+      'log': Gem::Version.new('0.4.11'),
+      'regex': Gem::Version.new('1.3.9'),
+      'termcolor': Gem::Version.new('1.1.0'),
+      'humantime': Gem::Version.new('2.0.1'),
+      'atty': Gem::Version.new('0.2.14'),
+      'uuid': Gem::Version.new('0.8.1'),
+      'tempdir': Gem::Version.new('0.3.7'),
+      'cc': Gem::Version.new('1.0.59'),
+    }
+  }
+  
   it 'expects the default dependency files to be Cargo.toml' do
     expect(RustLang.locations).to eq ['Cargo.toml']
   end
+  
+  it 'fetches latest version' do
+    mock = OpenStruct.new(
+      parse: {'crate' => {'max_version' => '1.0.0'}}
+    )
+    allow_any_instance_of(HTTP::Client).to receive(:get).with('https://crates.io/api/v1/crates/sinatra').and_return(mock)
+    expect(Gem::Version).to receive(:new).with('1.0.0').and_call_original
+    RustLang.latest_version('sinatra')
+    
+    allow_any_instance_of(HTTP::Client).to receive(:get).and_raise(HTTP::Error)
+    expect(RustLang.latest_version('fail')).to be_nil
+  end
 
   it 'parses Cargo.toml' do
+    expect(RustLang).to receive(:latest_version).and_return(*rust_latest_versions.values)
+
     results = RustLang.parse_file('Cargo.toml', CARGO)
     expect(results.length).to eq 9
 

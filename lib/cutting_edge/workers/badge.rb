@@ -18,7 +18,7 @@ class BadgeWorker < GenericWorker
   def perform(identifier)
     log_info 'Running Worker!'
     dependencies = get_from_store(identifier) # What if this fails?
-    dependencies = BADGE_LAYOUT.keys.map { |k| [k, dependencies[k]] }.to_h.
+    dependencies = ::CuttingEdge::BADGE_LAYOUT.keys.map { |k| [k, dependencies[k]] }.to_h.
       delete_if {|type, number| number == 0}
 
     add_to_store("svg-#{identifier}", ERB.new(CuttingEdge::BADGE_TEMPLATE).result_with_hash(

@@ -20,11 +20,26 @@ def translate_req(str)
 end
 
 describe RustLang do
+  let(:rust_latest_versions) {
+    {
+      'log': Gem::Version.new('0.4.11'),
+      'regex': Gem::Version.new('1.3.9'),
+      'termcolor': Gem::Version.new('1.1.0'),
+      'humantime': Gem::Version.new('2.0.1'),
+      'atty': Gem::Version.new('0.2.14'),
+      'uuid': Gem::Version.new('0.8.1'),
+      'tempdir': Gem::Version.new('0.3.7'),
+      'cc': Gem::Version.new('1.0.59'),
+    }
+  }
+  
   it 'expects the default dependency files to be Cargo.toml' do
     expect(RustLang.locations).to eq ['Cargo.toml']
   end
 
   it 'parses Cargo.toml' do
+    expect(RustLang).to receive(:latest_version).and_return(*rust_latest_versions.values)
+
     results = RustLang.parse_file('Cargo.toml', CARGO)
     expect(results.length).to eq 9
 

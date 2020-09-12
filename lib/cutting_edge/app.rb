@@ -35,16 +35,28 @@ module CuttingEdge
   class App < Sinatra::Base
     include CuttingEdgeHelpers
 
+    set :views, ::File.join(::File.dirname(__FILE__), 'templates')
+    Tilt.register Tilt::ERBTemplate, 'html.erb'
+    set :public_folder, ::File.join(::File.dirname(__FILE__), 'public')
+
     logger filename: "#{settings.environment}.log", level: :trace
 
     before do
       @store = settings.store
     end
 
-    get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
+    get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
       content_type :json
       @store[@repo.identifier].merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+    end
+
+    get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
+      repo_defined?(source, org, name)
+      @name = name
+      @svg = url("/#{source}/#{org}/#{name}/svg")
+      @specs = @store[@repo.identifier].merge({:language => @repo.lang})
+      erb :info
     end
 
     get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|

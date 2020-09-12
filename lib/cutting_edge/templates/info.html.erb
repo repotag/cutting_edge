@@ -1,0 +1,56 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Dependency Overview</title>
+  <meta name="description" content="Cutting Edge">
+  <meta name="author" content="Repotag">
+
+  <link rel="stylesheet" href="/stylesheets/primer.css">
+
+</head>
+
+<body>
+
+	<div class="container-lg">
+		<div class="Header">
+			<div class="Header-item">Cutting Edge</div>
+		</div>
+		<svg><image xlink:href="<%= @svg %>" /></svg>
+		<label><%= @svg %></label>
+
+		<h1><%= @name %> (<%= @specs[:language] %>)</h1>
+		
+
+		<% @specs[:locations].each do |filename, spec| %>
+			<h3><%= filename %></h3>
+			<div class="Box flex-auto">
+				<div class="Box-header d-flex flex-justify-center">
+					<div class="p-5">Name</div>
+					<div class="p-5">Required</div>
+					<div class="p-5">Latest</div>
+					<div class="p-5">Status</div>
+				</div>
+				<% spec.each do |type, dependencies| %>
+					<% next if dependencies.empty? %>
+					<% dependencies.each do |dependency| %>
+						<div class="Box-row d-flex flex-justify-center">
+							<div class="p-5"><%= dependency[:name] %></div>
+							<div class="p-5"><%= dependency[:required] %></div>
+							<div class="p-5"><%= dependency[:latest] %></div>
+							<div class="p-5"><%= type %></div>
+						</div>
+					<% end %>
+				<% end %>
+			</div>
+		<% end %>
+	</div>
+	
+	
+	
+  <script src="js/scripts.js"></script>
+</body>
+</html>
+

@@ -3,7 +3,7 @@ This is <a href="<%= url %>">CuttingEdge</a> informing you that the dependency s
 </p>
 
 <p>
-<% dependencies.each do |location, groups| %>
+<% dependencies[:locations].each do |location, groups| %>
 In <%= location %>: <%= groups %>
 <% end %>
 </p>

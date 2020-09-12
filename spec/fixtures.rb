@@ -152,7 +152,7 @@ def mock_dependencies_no_stats(name)
 end
 
 def mock_fetched_requirements(name, location, update_latest = false)
-  dependencies = mock_dependencies(name)[location]
+  dependencies = mock_dependencies(name)[:locations][location]
   results = []
   dependencies.each_value do |dependency_type|
     dependency_type.each do |dependency|

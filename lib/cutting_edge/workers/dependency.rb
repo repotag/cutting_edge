@@ -15,12 +15,12 @@ class DependencyWorker < GenericWorker
     log_info 'Running Worker!'
     old_dependencies = get_from_store(identifier)
     begin
-      dependencies = {}
+      dependencies = {:locations => {}}
       locations.each do |name, url|
         contents = http_get(url)
-        dependencies[name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
+        dependencies[:locations][name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
       end
-      dependencies.merge!(generate_stats(dependencies))
+      dependencies.merge!(generate_stats(dependencies[:locations]))
       @nothing_changed = dependencies == old_dependencies
       add_to_store(identifier, dependencies) unless @nothing_changed
     ensure

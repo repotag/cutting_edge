@@ -42,7 +42,7 @@
 					<% next if dependencies.empty? %>
 					<% dependencies.each do |dependency| %>
 						<div class="Box-row Box-row--focus-gray d-flex" role="row">
-							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:name] %></div>
+							<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= type %></div>

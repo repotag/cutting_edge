@@ -44,7 +44,7 @@ class RustLang < Language
       rescue StandardError, HTTP::Error => e
         log_error("Encountered error when fetching latest version of #{name}: #{e.class} #{e.message}")
         nil
-      end
+      end      
     end
 
     # Translate Cargo version requirement syntax to a String or Array of Strings that Gem::Dependency.new understands

@@ -1,9 +1,38 @@
 def mock_dependencies(name)
   {
+    'ok' =>
+    {
+      :locations => {
+        'ok.gemspec' =>
+          {:outdated_major=>[],
+           :outdated_patch=>[],
+           :ok=>
+            [
+              {:name=>'gollum-lib',
+               :required=>'~> 5.0',
+               :latest=>'5.0.3',
+               :type=>:runtime},
+              {:name => 'foobar',
+               :required => '= 1.0',
+               :latest => '1.0',
+               :type => :runtime
+             }
+            ],
+           :no_requirement=>[],
+           :unknown=>[]},
+      },
+      :ok=>2,
+      :outdated=>:up_to_date,
+      :outdated_major=>0,
+      :outdated_minor=>0,
+      :outdated_patch=>0,
+      :outdated_total=>0,
+      :unknown=>0,
+      :no_requirement => 0
+    },
     'gollum' =>
     {
-      :locations =>
-      {
+      :locations => {
         'gollum.gemspec' =>
           {:outdated_major=>
             [{:name=>'mustache',

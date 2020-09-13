@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="<%= total_width = base_width + (cell_width * dependencies.size) %>" height="20" role="img" aria-label="CuttingEdge Dependency Status">
+    <title>CuttingEdge Dependency Status</title>
+    <linearGradient id="s" x2="0" y2="100%">
+        <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+        <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <clipPath id="r">
+        <rect width="<%= total_width %>" height="20" rx="3" fill="#fff"/>
+    </clipPath>
+    <g clip-path="url(#r)">
+        <rect width="35" height="20" fill="#555"/>
+        <%
+        dependencies.each_with_index do |(type, number), i|
+        %>
+        <rect x="<%= base_width + (cell_width * i) %>" width="<%= cell_width %>" height="20" fill="<%= colors[type] %>"/>
+        <%
+        end
+        %>
+        <rect width="<%= total_width %>" height="20" fill="url(#s)"/>
+    </g>
+    <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
+        <% ce_x = (base_width * 10) / 2 %>
+        <text aria-hidden="true" x="<%= ce_x %>" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">CE</text>
+        <text x="<%= ce_x %>" y="140" transform="scale(.1)" fill="#fff">CE</text>
+        
+        <%
+        dependencies.each_with_index do |(type, number), i|
+        x = (base_width + (cell_width * i) + (cell_width / 2)) * 10
+        %>
+        <g>
+          <title><%= "#{type.to_s.split('_').collect(&:capitalize).join(' ')}: #{number}" %></title>
+          <text aria-hidden="true" x="<%= x %>" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)"><%= number %></text>
+          <text x="<%= x %>" y="140" transform="scale(.1)" fill="#fff"><%= number %></text>        
+        </g>
+        <%
+        end
+        %>
+    </g>
+</svg>

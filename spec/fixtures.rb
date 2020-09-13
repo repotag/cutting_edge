@@ -32,54 +32,56 @@ def mock_dependencies(name)
     },
     'gollum' =>
     {
-      :locations => {
-        'gollum.gemspec' =>
+      :locations=>
+        {'gollum.gemspec'=>
           {:outdated_major=>
             [{:name=>'mustache',
               :required=>'>= 0.99.5, < 1.0.0',
               :latest=>'1.1.1',
-              :type=>:runtime},
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/mustache'},
              {:name=>'octicons',
               :required=>'~> 8.5',
               :latest=>'9.6.0',
-              :type=>:runtime}],
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/octicons'}],
            :outdated_minor=>
             [{:name=>'kramdown-parser-gfm',
               :required=>'~> 1.0.0',
               :latest=>'1.1.0',
-              :type=>:runtime}],
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/kramdown-parser-gfm'}],
            :outdated_patch=>[],
            :ok=>
-            [
-              {:name=>'gollum-lib',
-               :required=>'~> 5.0',
-               :latest=>'5.0.3',
-               :type=>:runtime},
-              {:name => 'foobar',
-               :required => '= 1.0',
-               :latest => '1.0',
-               :type => :runtime
-             }
-           ],
-            :no_requirement=>[],
-            :unknown=>[]},
-        'Gemfile' =>
-          {
-            :outdated_major=>[
-              {
-                :name=>'rake',
-                :required=>'~> 12.3, >= 12.3.3',
-                :latest=>'13.0.1',
-                :type=>:runtime
-              }],
-            :outdated_minor=>[],
-            :outdated_patch=>[],
-            :ok=>
-             [{:name=>'warbler', :required=>'>= 0', :latest=>'2.0.5', :type=>:runtime}],
-            :no_requirement=>[],
-            :unknown=>[]
-          },
-      },
+            [{:name=>'gollum-lib',
+              :required=>'~> 5.0',
+              :latest=>'5.0.3',
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/gollum-lib'},
+             {:name=>'foobar',
+              :required=>'= 1.0',
+              :latest=>'1.0',
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/foobar'}],
+           :no_requirement=>[],
+           :unknown=>[]},
+         'Gemfile'=>
+          {:outdated_major=>
+            [{:name=>'rake',
+              :required=>'~> 12.3, >= 12.3.3',
+              :latest=>'13.0.1',
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/rake'}],
+           :outdated_minor=>[],
+           :outdated_patch=>[],
+           :ok=>
+            [{:name=>'warbler',
+              :required=>'>= 0',
+              :latest=>'2.0.5',
+              :type=>:runtime,
+              :url=>'https://rubygems.org/gems/warbler'}],
+           :no_requirement=>[],
+           :unknown=>[]}},
       :ok=>3,
       :outdated=>:outdated_major,
       :outdated_major=>3,
@@ -92,47 +94,55 @@ def mock_dependencies(name)
     'gollum-updated' =>
       {
         :locations =>
-        {
-          'Gemfile'=>
-            {:no_requirement=>[],
-             :ok=>
-              [{:latest=>'3.0.5',
-                :name=>'warbler',
-                :required=>'>= 0',
-                :type=>:runtime}],
-             :outdated_major=>
-              [{:latest=>'14.0.1',
-                :name=>'rake',
-                :required=>'~> 12.3, >= 12.3.3',
-                :type=>:runtime}],
-             :outdated_minor=>[],
-             :outdated_patch=>[],
-             :unknown=>[]},
-         'gollum.gemspec'=>
-            {:no_requirement=>[],
-             :ok=>[],
-             :outdated_major=>
-              [{:latest=>'2.1.1',
-                :name=>'mustache',
+          {'gollum.gemspec'=>
+            {:outdated_major=>
+              [{:name=>'mustache',
                 :required=>'>= 0.99.5, < 1.0.0',
-                :type=>:runtime},
-               {:latest=>'10.6.0',
-                :name=>'octicons',
+                :latest=>'2.1.1',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/mustache'},
+               {:name=>'octicons',
                 :required=>'~> 8.5',
-                :type=>:runtime},
-               {:latest=>'2.1.0',
-                :name=>'kramdown-parser-gfm',
+                :latest=>'10.6.0',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/octicons'},
+               {:name=>'kramdown-parser-gfm',
                 :required=>'~> 1.0.0',
-                :type=>:runtime},
-               {:latest=>'6.0.3',
-                :name=>'gollum-lib',
+                :latest=>'2.1.0',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/kramdown-parser-gfm'},
+               {:name=>'gollum-lib',
                 :required=>'~> 5.0',
-                :type=>:runtime},
-               {:latest=>'2.0', :name=>'foobar', :required=>'= 1.0', :type=>:runtime}],
+                :latest=>'6.0.3',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/gollum-lib'},
+               {:name=>'foobar',
+                :required=>'= 1.0',
+                :latest=>'2.0',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/foobar'}],
              :outdated_minor=>[],
              :outdated_patch=>[],
+             :ok=>[],
+             :no_requirement=>[],
              :unknown=>[]},
-         },
+           'Gemfile'=>
+            {:outdated_major=>
+              [{:name=>'rake',
+                :required=>'~> 12.3, >= 12.3.3',
+                :latest=>'14.0.1',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/rake'}],
+             :outdated_minor=>[],
+             :outdated_patch=>[],
+             :ok=>
+              [{:name=>'warbler',
+                :required=>'>= 0',
+                :latest=>'3.0.5',
+                :type=>:runtime,
+                :url=>'https://rubygems.org/gems/warbler'}],
+             :no_requirement=>[],
+             :unknown=>[]}},
          :no_requirement=>0,
          :ok=>1,
          :outdated=>:outdated_major,

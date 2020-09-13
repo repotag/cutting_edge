@@ -52,13 +52,14 @@ describe DependencyWorker do
     end
   end
   
-  it 'generates results for fetched requirements' do    
+  it 'generates results for fetched requirements' do
+    worker.instance_variable_set(:@lang, RubyLang)
     fetched = [RubyLang.unknown_dependency('unknown_requirement'), Gem::Version.new('1.0')]
-    result_no_requirement = {:no_requirement=>[{:latest=>"1.0", :name=>"unknown_requirement", :required=>"unknown", :type=>:runtime}], :ok=>[], :outdated_major=>[], :outdated_minor=>[], :outdated_patch=>[], :unknown=>[]}
+    result_no_requirement = {:no_requirement=>[{:latest=>"1.0", :name=>"unknown_requirement", :required=>"unknown", :type=>:runtime, :url=>nil}], :ok=>[], :outdated_major=>[], :outdated_minor=>[], :outdated_patch=>[], :unknown=>[]}
     expect(worker.send(:get_results, [fetched], dependency_types)).to eq result_no_requirement
     
     fetched = [Gem::Dependency.new('unknown_version', '1.0', :runtime), nil]
-    result_no_version = {:no_requirement=>[], :ok=>[], :outdated_major=>[], :outdated_minor=>[], :outdated_patch=>[], :unknown=>[{:latest=>"", :name=>"unknown_version", :required=>"= 1.0", :type=>:runtime}]}
+    result_no_version = {:no_requirement=>[], :ok=>[], :outdated_major=>[], :outdated_minor=>[], :outdated_patch=>[], :unknown=>[{:latest=>"", :name=>"unknown_version", :required=>"= 1.0", :type=>:runtime, :url=>"https://rubygems.org/gems/unknown_version"}]}
     expect(worker.send(:get_results, [fetched], dependency_types)).to eq result_no_version
   end 
   

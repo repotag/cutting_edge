@@ -9,7 +9,11 @@ class RubyLang < Language
     def locations(name)
       ["#{name}.gemspec", 'Gemfile']
     end
-
+    
+    def website(name)
+      "https://rubygems.org/gems/#{name}"
+    end
+    
     # Parse a dependency file
     #
     # name - String contents of the file

@@ -63,6 +63,10 @@ describe PythonLang do
     expect(PythonLang.locations).to eq ['requirements.txt', 'Pipfile']
   end
   
+  it 'returns a website for a dependency' do
+    expect(PythonLang.website('foobar')).to eq 'https://pypi.org/project/foobar'
+  end
+  
   it 'fetches latest version' do
     mock = OpenStruct.new(
       parse: {'info' => {'version' => '1.0.0'}}

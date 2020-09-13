@@ -74,6 +74,10 @@ describe RubyLang do
     expect(RubyLang.locations('test')).to eq ['test.gemspec', 'Gemfile']
   end
   
+  it 'returns a website for a dependency' do
+    expect(RubyLang.website('foobar')).to eq 'https://rubygems.org/gems/foobar'
+  end
+  
   it 'fetches latest version' do
     expect(Gem::SpecFetcher.fetcher).to receive(:spec_for_dependency).and_return([])
     RubyLang.latest_version('sinatra')

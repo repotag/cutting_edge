@@ -12,7 +12,7 @@ module CuttingEdge
     outdated_minor: '#fe7d37',
     outdated_major: '#e05d44',
     unknown: '#9f9f9f'
-  } unless defined?(BADGE_LAYOUT)
+  } unless defined?(BADGE_COLORS)
   BADGE_LAYOUT = [:ok, :outdated_patch, :outdated_minor, :outdated_major, :unknown] unless defined?(BADGE_LAYOUT)
 end
 

@@ -13,12 +13,13 @@ class DependencyWorker < GenericWorker
 
   def perform(identifier, lang, locations, dependency_types, to_addr)
     log_info 'Running Worker!'
+    @lang = get_lang(lang)
     old_dependencies = get_from_store(identifier)
     begin
       dependencies = {:locations => {}}
       locations.each do |name, url|
         contents = http_get(url)
-        dependencies[:locations][name] = get_results(get_lang(lang).parse_file(name, contents), dependency_types)
+        dependencies[:locations][name] = get_results(@lang.parse_file(name, contents), dependency_types)
       end
       dependencies.merge!(generate_stats(dependencies[:locations]))
       @nothing_changed = dependencies == old_dependencies
@@ -85,7 +86,8 @@ class DependencyWorker < GenericWorker
       :name => name,
       :required => requirement,
       :latest => latest,
-      :type => type
+      :type => type,
+      :url => requirement == 'unknown' ? nil : @lang.website(name)
     }
   end
 

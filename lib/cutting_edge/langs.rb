@@ -7,7 +7,8 @@ class Gem::Dependency
 end
 
 module LanguageHelpers
-  # Return a mock construct that mimicks Gem::Dependency for depedencies we tried to parse, but weren't valid.
+  
+  # Return a mock construct that mimicks Gem::Dependency for dependencies we tried to parse, but weren't valid.
   def unknown_dependency(name, type = :runtime)
     OpenStruct.new(name: name, type: type, requirement: 'unknown')
   end
@@ -31,6 +32,10 @@ end
 class Language
   include ::SemanticLogger::Loggable
   extend LanguageHelpers
+  
+  def website(name)
+    raise 'Please implement'
+  end
 end
 
 module LanguageVersionHelpers

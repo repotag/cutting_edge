@@ -25,6 +25,10 @@ class PythonLang < Language
     def locations(name = nil)
       ['requirements.txt', 'Pipfile']
     end
+    
+    def website(name)
+      "https://pypi.org/project/#{name}"
+    end
 
     # Parse a dependency file
     #

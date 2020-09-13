@@ -18,6 +18,10 @@ class RustLang < Language
     def locations(name = nil)
       ['Cargo.toml']
     end
+    
+    def website(name)
+      "https://crates.io/crates/#{name}"
+    end
 
     # Parse a dependency file
     #

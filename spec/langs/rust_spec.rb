@@ -37,6 +37,10 @@ describe RustLang do
     expect(RustLang.locations).to eq ['Cargo.toml']
   end
   
+  it 'returns a website for a dependency' do
+    expect(RustLang.website('foobar')).to eq 'https://crates.io/crates/foobar'
+  end
+  
   it 'fetches latest version' do
     mock = OpenStruct.new(
       parse: {'crate' => {'max_version' => '1.0.0'}}

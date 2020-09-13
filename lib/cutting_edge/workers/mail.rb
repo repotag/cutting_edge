@@ -3,7 +3,7 @@ require 'erb'
 require 'mail'
 
 module CuttingEdge
-  MAIL_TEMPLATE = File.read(File.expand_path('../../templates/mail.html.erb', __FILE__))
+  MAIL_TEMPLATE = File.read(File.expand_path('../../templates/mail.html.erb', __FILE__)) unless defined?(MAIL_TEMPLATE)
 end
 
 class MailWorker < GenericWorker

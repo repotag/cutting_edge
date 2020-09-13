@@ -14,37 +14,43 @@
 
 <body>
 
+
+
 	<div class="container-lg">
-		<div class="Header">
+		
+		<header class="Header" role="banner">
 			<div class="Header-item">Cutting Edge</div>
-		</div>
+		</header>
+		
 		<svg><image xlink:href="<%= @svg %>" /></svg>
 		<label><%= @svg %></label>
 
 		<h1><%= @name %> (<%= @specs[:language] %>)</h1>
-		
+		<br/>
 
 		<% @specs[:locations].each do |filename, spec| %>
 			<h3><%= filename %></h3>
+			<br/>
 			<div class="Box flex-auto">
-				<div class="Box-header d-flex flex-justify-center">
-					<div class="p-5">Name</div>
-					<div class="p-5">Required</div>
-					<div class="p-5">Latest</div>
-					<div class="p-5">Status</div>
+				<div class="Box-header Box-header--blue d-flex">
+					<div class="flex-auto col-md-2" role="gridcell"><b>Name</b></div>
+					<div class="flex-auto col-md-2" role="gridcell"><b>Required</b></div>
+					<div class="flex-auto col-md-2" role="gridcell"><b>Latest</b></div>
+					<div class="flex-auto col-md-2" role="gridcell"><b>Status</b></div>
 				</div>
 				<% spec.each do |type, dependencies| %>
 					<% next if dependencies.empty? %>
 					<% dependencies.each do |dependency| %>
-						<div class="Box-row d-flex flex-justify-center">
-							<div class="p-5"><%= dependency[:name] %></div>
-							<div class="p-5"><%= dependency[:required] %></div>
-							<div class="p-5"><%= dependency[:latest] %></div>
-							<div class="p-5"><%= type %></div>
+						<div class="Box-row Box-row--focus-gray d-flex" role="row">
+							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:name] %></div>
+							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
+							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
+							<div class="flex-auto col-md-2" role="gridcell"><%= type %></div>
 						</div>
 					<% end %>
 				<% end %>
 			</div>
+			<br/>
 		<% end %>
 	</div>
 	

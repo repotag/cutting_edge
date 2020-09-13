@@ -25,7 +25,7 @@
 		<svg><image xlink:href="<%= @svg %>" /></svg>
 		<label><%= @svg %></label>
 
-		<h1><%= @name %> (<%= @specs[:language] %>)</h1>
+		<h1><%= @name %> (<%= @language %>)</h1>
 		<br/>
 
 		<% @specs[:locations].each do |filename, spec| %>

@@ -45,6 +45,10 @@ module CuttingEdge
       @store = settings.store
     end
 
+    get "/" do
+      erb :index
+    end
+
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
       content_type :json
@@ -55,7 +59,8 @@ module CuttingEdge
       repo_defined?(source, org, name)
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
-      @specs = @store[@repo.identifier].merge({:language => @repo.lang})
+      @specs = @store[@repo.identifier]
+      @language = @repo.lang
       erb :info
     end
 

@@ -10,29 +10,48 @@
 
   <link rel="stylesheet" href="/stylesheets/primer.css">
 
+
+
 </head>
 
 <body>
 
 
-
 	<div class="container-lg">
 		
 		<header class="Header" role="banner">
-			<div class="Header-item">Cutting Edge</div>
+			<div class="Header-item--full">
+				<a href="https://github.com/repotag/cutting_edge" class="Header-link">Cutting Edge</a>
+			</div>
+			<div class="Header-item">
+				<a class="Header-link github-button" href="https://github.com/repotag/cutting_edge" data-show-count="true" aria-label="Star repotag/cutting_edge on GitHub">Star</a>
+			</div>
 		</header>
 		
-		<svg><image xlink:href="<%= @svg %>" /></svg>
-		<label><%= @svg %></label>
-
-		<h1><%= @name %> (<%= @language %>)</h1>
 		<br/>
+
+	  <div class="pagehead">
+			<h1><%= @name %> (<%= @language %>)</h1>
+		</div>
+						
+		<div class="TableObject">
+		  <div class="TableObject-item TableObject-item--primary">
+		    <svg height="20" width="100"><image xlink:href="<%= @svg %>" /></svg>
+		  </div>
+		  <div class="TableObject-item">
+   			<span><%= @svg %></span>
+		  </div>
+		</div>
+
+		<br/>
+
+		<% colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'} %>
 
 		<% @specs[:locations].each do |filename, spec| %>
 			<h3><%= filename %></h3>
 			<br/>
 			<div class="Box flex-auto">
-				<div class="Box-header Box-header--blue d-flex">
+				<div class="Box-header Box-header--gray d-flex">
 					<div class="flex-auto col-md-2" role="gridcell"><b>Name</b></div>
 					<div class="flex-auto col-md-2" role="gridcell"><b>Required</b></div>
 					<div class="flex-auto col-md-2" role="gridcell"><b>Latest</b></div>
@@ -41,11 +60,11 @@
 				<% spec.each do |type, dependencies| %>
 					<% next if dependencies.empty? %>
 					<% dependencies.each do |dependency| %>
-						<div class="Box-row Box-row--focus-gray d-flex" role="row">
+						<div class="Box-row Box-row--hover-gray d-flex" role="row">
 							<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
-							<div class="flex-auto col-md-2" role="gridcell"><%= type %></div>
+							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= colors[type] %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
 						</div>
 					<% end %>
 				<% end %>
@@ -54,9 +73,9 @@
 		<% end %>
 	</div>
 	
+	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	
-	
-  <script src="js/scripts.js"></script>
+
 </body>
 </html>
 

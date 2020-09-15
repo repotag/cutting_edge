@@ -46,6 +46,7 @@ module CuttingEdge
     end
 
     get "/" do
+      @repos = CuttingEdge::App.repositories
       erb :index
     end
 

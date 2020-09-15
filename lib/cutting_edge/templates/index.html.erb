@@ -19,13 +19,33 @@
 	<div class="container-lg">
 		
 		<header class="Header" role="banner">
-			<div class="Header-item">Cutting Edge</div>
+			<div class="Header-item--full">
+				<a href="https://github.com/repotag/cutting_edge" class="Header-link">Cutting Edge</a>
+			</div>
+			<div class="Header-item">
+				<a class="Header-link github-button" href="https://github.com/repotag/cutting_edge" data-show-count="true" aria-label="Star repotag/cutting_edge on GitHub">Star</a>
+			</div>
+
 		</header>
 		
+		<br/>
+		<div class="pagehead">
+			<h1>Monitored Projects</h1>
+		</div>
+		<br/>
+
+		<div class="Box">
+			<% @repos.each do |repo, info| %>
+
+				<div class="Box-row Box-row--hover-gray d-flex flex-items-center" role="row">
+					<a href="" class="overflow-hidden flex-auto"><%= repo.gsub('/', '<span class="path-divider"> / </span>') %></a>
+					<a href="<%= "#{url(repo)}/info" %>"><svg height="20" width="100"><image xlink:href="<%= "#{url(repo)}/svg" %>" /></svg></a>
+				</div>
+			<% end %>
+		</div>
+				
 	</div>
 	
-	
-	
-  <script src="js/scripts.js"></script>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>

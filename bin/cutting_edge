@@ -1,56 +1,86 @@
 #!/usr/bin/env ruby
 
-require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 require 'yaml'
 require 'rufus-scheduler'
+require 'optparse'
 
-REFRESH_SCHEDULE = '1h'
-
-config = <<YAML
-github:
-  gollum:
-    gollum:
-      api_token: secret
-      email: false
-    gollum-lib:
-      api_token: secret
-      locations: [gemspec.rb]
-      dependency_types: [runtime, development]
-      email: gollum@mydependencymonitoring.com
-  singingwolfboy:
-    flask-dance:
-      language: python
-      email: false
-  rust-lang:
-    crates.io:
-      language: rust
-      api_token: secret
-gitlab:
-  cthowl01:
-    team-chess-ruby:
-      locations: [Gemfile]
-      api_token: secret
-YAML
+module CuttingEdge
+  REFRESH_SCHEDULE = '1h'
+end
 
 options = {
   :port => 4567,
-  :bind => '0.0.0.0',
+  :bind => '0.0.0.0'
 }
 
-store = Moneta.new(:Memory)
-CuttingEdge::App.set(:store, store)
-
-repositories = {}
-YAML.load(config).each do |source, orgs|
-  orgs.each do |org, value|
-    value.each do |name, settings|
-      cfg = settings.is_a?(Hash) ? settings : {}
-      repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
-      repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
-      repositories["#{source}/#{org}/#{name}"] = repo
+opts = OptionParser.new do |opts|
+  opts.banner = 'CuttingEdge is a dependency monitoring application.
+  
+  Usage:
+      cutting_edge [options] [projects]
+      
+  Arguments:
+      [projects]                     Path to the YAML file which defines the projects to be monitored. If not specified, projects.yml in the current working directory is used.
+'
+  opts.separator ''
+  
+  opts.on('-h', '--host [HOST]', 'Specify the hostname or IP address to listen on. Default: \'0.0.0.0\'.') do |host|
+    options[:bind] = host
+  end
+  
+  opts.on('-p', '--port [PORT]', 'Specify the port to bind to. Default: \'4567\'.') do |port|
+    begin
+      # don't use 'port.to_i' here... it doesn't raise errors which might result in a nice confusion later on
+      options[:port] = Integer(port)
+    rescue ArgumentError
+      puts "Error: '#{port}' is not a valid port number."
+      exit 1
     end
   end
+  
+  opts.on('-c', '--config [FILE]', 'Specify path to a .rb configuration file. Default: config.rb') do |file|
+    options[:config] = file || 'config.rb'
+  end
 end
+
+begin
+  opts.parse!
+rescue OptionParser::InvalidOption => e
+  puts "cutting_edge: #{e.message}"
+  puts 'cutting_edge: try \'cutting_edge --help\' for more information'
+  exit
+end
+
+if cfg = options[:config]
+  # If the path begins with a '/' it will be considered an absolute path,
+  # otherwise it will be relative to the CWD
+  cfg = File.join(Dir.getwd, cfg) unless cfg.slice(0) == File::SEPARATOR
+  require cfg
+end
+
+# Only require the app after loading the optional config file, to give user the chance to define constants.
+require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
+
+projects = ARGV[0] || 'projects.yml'
+repositories = {}
+begin
+  YAML.load(File.read(projects)).each do |source, orgs|
+    orgs.each do |org, value|
+      value.each do |name, settings|
+        cfg = settings.is_a?(Hash) ? settings : {}
+        repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
+        repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
+        repositories["#{source}/#{org}/#{name}"] = repo
+      end
+    end
+  end
+rescue SyntaxError, Errno::ENOENT => e
+  puts "Error: #{projects} does not contain a valid YAML project definition."
+  exit 1
+end
+
+CuttingEdge::STORE = Moneta.new(:Memory) unless defined?(CuttingEdge::STORE)
+CuttingEdge::App.set(:store, CuttingEdge::STORE)
 
 # Need to initialize the log like this once, because otherwise it only becomes available after the Sinatra app has received a request...
 ::SemanticLogger.add_appender(file_name: "#{CuttingEdge::App.environment}.log")
@@ -60,7 +90,7 @@ CuttingEdge::App.set(:enable_logging, true)
 
 puts 'Scheduling Jobs...'
 scheduler = Rufus::Scheduler.new
-scheduler.every(REFRESH_SCHEDULE) do
+scheduler.every(CuttingEdge::REFRESH_SCHEDULE) do
   worker_fetch_all(repositories.values)
 end
 

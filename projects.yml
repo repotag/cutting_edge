@@ -1,0 +1,31 @@
+# Example projects.yml file for CuttingEdge
+# For more information and options, see: https://github.com/repotag/cutting_edge
+
+github:
+  gollum:
+    gollum:
+      api_token: secret
+      email: false
+    gollum-lib:
+      api_token: secret
+      locations: [gemspec.rb]
+      dependency_types: [runtime, development]
+      email: gollum@mydependencymonitoring.com
+  singingwolfboy:
+    flask-dance:
+      language: python
+      email: false
+  rust-lang:
+    crates.io:
+      language: rust
+      api_token: secret
+gitlab:
+  cthowl01:
+    team-chess-ruby:
+      locations: [Gemfile]
+      api_token: secret
+mygitlab:
+  cthowl01:
+    team-chess-ruby:
+      locations: [Gemfile]
+      api_token: secret

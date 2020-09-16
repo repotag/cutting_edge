@@ -1,8 +1,53 @@
 require File.expand_path('../langs.rb', __FILE__)
 
 module CuttingEdge
+  module RepositoryMixin
+    def host
+      self.class.class_variable_get(:@@host)
+    end
+    
+    def source
+      self.class.class_variable_get(:@@source)
+    end
+    
+    class << self
+      def included(base)
+        base.extend ClassMethods
+      end
+    end
+    
+    module ClassMethods
+      def set_source(source)
+        class_variable_set(:@@source, source)
+      end
+      
+      def set_hostname(host)
+        class_variable_set(:@@host, host)
+      end
+    end
+  end
+  
+  module GitlabMixin
+    def url_for_project
+      File.join(host, @org, @name)
+    end
+    
+    def url_for_file(file)
+      File.join(host, @org, @name, 'raw', @branch, file)
+    end
+  end
+  
+  module GiteaMixin
+    def url_for_project
+      File.join(host, @org, @name)
+    end
+    
+    def url_for_file(file)
+      File.join(host, @org, @name, 'raw', 'branch', @branch, file)
+    end
+  end
+  
   class Repository
-
     DEPENDENCY_TYPES = [:runtime] # Which dependency types to accept (default only :runtime, excludes :development).
     DEFAULT_LANG = 'ruby'
 
@@ -30,6 +75,10 @@ module CuttingEdge
     def identifier
       File.join(source, @org, @name)
     end
+    
+    def url_for_project
+      ''
+    end
 
     def url_for_file(file)
       file
@@ -44,25 +93,36 @@ module CuttingEdge
 
   class GithubRepository < Repository
     HOST = 'https://raw.githubusercontent.com'
-
+    
     def source
       'github'
+    end
+    
+    def url_for_project
+      File.join('https://github.com', @org, @name)
     end
 
     def url_for_file(file)
       File.join(HOST, @org, @name, @branch, file)
     end
-  end
-
-  class GitlabRepository < Repository
-    HOST = 'https://gitlab.com/'
-
-    def source
-      'gitlab'
-    end
-
-    def url_for_file(file)
-      File.join(HOST, @org, @name, 'raw', @branch, file)
-    end
-  end
+  end  
 end
+
+def define_server(id, host, mixin)
+  CuttingEdge.const_set("#{id.capitalize}Repository", Class.new(CuttingEdge::Repository) {
+      include CuttingEdge::RepositoryMixin
+      include mixin
+      set_hostname host
+      set_source id
+    })
+end
+
+def define_gitlab_server(id, host)
+  define_server(id, host, CuttingEdge::GitlabMixin)
+end
+
+def define_gitea_server(id, host)
+  define_server(id, host, CuttingEdge::GiteaMixin)
+end
+
+define_gitlab_server('gitlab', 'https://gitlab.com/')

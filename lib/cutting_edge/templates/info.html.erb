@@ -55,7 +55,7 @@
 							<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
-							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= @colors[type] %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
+							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= @colors.fetch(type, 'gray') %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
 						</div>
 					<% end %>
 				<% end %>

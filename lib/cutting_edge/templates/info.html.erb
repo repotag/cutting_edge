@@ -39,7 +39,7 @@
 		    <svg height="20" width="100"><image xlink:href="<%= @svg %>" /></svg>
 		  </div>
 		  <div class="TableObject-item">
-   			<span><%= @svg %></span>
+				<button class="btn btn-sm" id="copy-button" role="button" data-clipboard-text="<%= @svg %>">Copy badge link to clipboard</button>
 		  </div>
 		</div>
 
@@ -78,7 +78,8 @@
 	</div>
 	
 	
-	
+	<script src="/javascript/clipboard.min.js"></script>
+	<script>new ClipboardJS('#copy-button');</script>
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	
 

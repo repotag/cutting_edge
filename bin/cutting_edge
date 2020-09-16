@@ -28,7 +28,7 @@ opts = OptionParser.new do |opts|
     options[:bind] = host
   end
   
-  opts.on('-p', '--port [PORT]', 'Specify the port to bind Gollum with. Default: \'4567\'.') do |port|
+  opts.on('-p', '--port [PORT]', 'Specify the port to bind to. Default: \'4567\'.') do |port|
     begin
       # don't use 'port.to_i' here... it doesn't raise errors which might result in a nice confusion later on
       options[:port] = Integer(port)
@@ -38,8 +38,8 @@ opts = OptionParser.new do |opts|
     end
   end
   
-  opts.on('-c', '--config [FILE]', 'Specify path to a .rb configuration file.') do |file|
-    options[:config] = file
+  opts.on('-c', '--config [FILE]', 'Specify path to a .rb configuration file. Default: config.rb') do |file|
+    options[:config] = file || 'config.rb'
   end
 end
 

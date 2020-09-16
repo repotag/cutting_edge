@@ -10,6 +10,7 @@
 #   MAIL_FROM = "cutting_edge@#{SERVER_HOST}" # From Address used for sending e-mails. Default: "cutting_edge@#{SERVER_HOST}" 
 #   MAIL_TEMPLATE = <<EOF
 #     Define your own ERB template for e-mail updates from CuttingEdge here!
+#     Of course, you can also File.read it from a separate template file.
 #     See lib/cutting_edge/templates/mail.html.erb for the default template, and the available variables.
 # EOF
 # 
@@ -23,14 +24,16 @@
 #    unknown: '#9f9f9f'
 #   } # Redefine the colors used in SVG badges
 # 
-#   # The following will allow you to define projects on your own GitLab server in projects.yml
-#   # If you want to use the key 'myserver' in projects.yml, your repository class must be named MyserverRepository
-#   require './lib/cutting_edge/repo.rb'
-#   class MyserverRepository < GitlabRepository # The naming here is .
-#     HOST = 'https://myserver.com/'
-#     # This will allow you to use your own GitLab instance in projects.yml like so:
-#     # myserver:
-#     #   orgname:
-#     #     projectname:
-#   end
+# # The following will allow you to define projects on your own GitLab or Gitea server in projects.yml
+# # This will allow you to use the 'mygitlab' and 'mygitea' keys, respectively, in projects.yml
+  require './lib/cutting_edge/repo.rb'
+  define_gitlab_server('mygitlab', 'https://mygitlab.com')
+  define_gitea_server('mygitea', 'https://mygitea.com')
+#   # Now you may use your own server instance in projects.yml like so:
+#   # mygitlab:
+#   #   orgname:
+#   #     projectname:
+#   #       language: rust
+#   #     ruby_project:
+#   #       language ruby
 # end

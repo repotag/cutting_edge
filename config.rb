@@ -26,9 +26,9 @@
 # 
 # # The following will allow you to define projects on your own GitLab or Gitea server in projects.yml
 # # This will allow you to use the 'mygitlab' and 'mygitea' keys, respectively, in projects.yml
-  require './lib/cutting_edge/repo.rb'
-  define_gitlab_server('mygitlab', 'https://mygitlab.com')
-  define_gitea_server('mygitea', 'https://mygitea.com')
+#   require './lib/cutting_edge/repo.rb'
+#   define_gitlab_server('mygitlab', 'https://mygitlab.com')
+#   define_gitea_server('mygitea', 'https://mygitea.com')
 #   # Now you may use your own server instance in projects.yml like so:
 #   # mygitlab:
 #   #   orgname:

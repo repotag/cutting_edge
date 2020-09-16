@@ -60,6 +60,7 @@ module CuttingEdge
       repo_defined?(source, org, name)
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
+      @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
       @specs = @store[@repo.identifier]
       @language = @repo.lang
       erb :info

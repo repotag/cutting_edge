@@ -21,7 +21,7 @@
 		
 		<header class="Header" role="banner">
 			<div class="Header-item--full">
-				<a href="https://github.com/repotag/cutting_edge" class="Header-link">Cutting Edge</a>
+				<a href="<%= url('/') %>" class="Header-link">Cutting Edge</a>
 			</div>
 			<div class="Header-item">
 				<a class="Header-link github-button" href="https://github.com/repotag/cutting_edge" data-show-count="true" aria-label="Star repotag/cutting_edge on GitHub">Star</a>
@@ -45,8 +45,6 @@
 
 		<br/>
 
-		<% colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'} %>
-
 		<% @specs[:locations].each do |filename, spec| %>
 			<h3><%= filename %></h3>
 			<br/>
@@ -64,7 +62,7 @@
 							<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
 							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
-							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= colors[type] %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
+							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= @colors[type] %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
 						</div>
 					<% end %>
 				<% end %>

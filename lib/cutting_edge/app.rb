@@ -47,6 +47,7 @@ module CuttingEdge
 
     get "/" do
       @repos = CuttingEdge::App.repositories
+      $stderr.puts @repos
       erb :index
     end
 
@@ -60,8 +61,10 @@ module CuttingEdge
       repo_defined?(source, org, name)
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
+      @md = "[![Cutting Edge Dependency Status](#{@svg})](#{url("/#{source}/#{org}/#{name}/info")})"
       @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
       @specs = @store[@repo.identifier]
+      @project_url = @repo.url_for_project
       @language = @repo.lang
       erb :info
     end

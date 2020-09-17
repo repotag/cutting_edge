@@ -30,7 +30,7 @@
 			<% @repos.each do |repo, info| %>
 
 				<div class="Box-row Box-row--hover-gray d-flex flex-items-center" role="row">
-					<a href="<%= repo %>" class="overflow-hidden flex-auto"><%= repo.gsub('/', '<span class="path-divider"> / </span>') %></a>
+					<a href="<%= @repos[repo].url_for_project %>" class="overflow-hidden flex-auto"><%= repo.gsub('/', '<span class="path-divider"> / </span>') %></a>
 					<a href="<%= "#{url(repo)}/info" %>"><svg height="20" width="100"><image xlink:href="<%= "#{url(repo)}/svg" %>" /></svg></a>
 				</div>
 			<% end %>

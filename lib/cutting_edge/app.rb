@@ -47,7 +47,6 @@ module CuttingEdge
 
     get "/" do
       @repos = CuttingEdge::App.repositories
-      $stderr.puts @repos
       erb :index
     end
 

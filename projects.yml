@@ -24,8 +24,3 @@ gitlab:
     team-chess-ruby:
       locations: [Gemfile]
       api_token: secret
-mygitlab:
-  cthowl01:
-    team-chess-ruby:
-      locations: [Gemfile]
-      api_token: secret

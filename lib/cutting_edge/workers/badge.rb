@@ -2,8 +2,8 @@ require File.expand_path('../helpers.rb', __FILE__)
 
 module CuttingEdge
   BADGE_TEMPLATE = File.read(File.expand_path('../../templates/badge.svg.erb', __FILE__)) unless defined?(BADGE_TEMPLATE)
-  BADGE_OK = File.read(File.expand_path('../../static/ok.svg', __FILE__)) unless defined?(BADGE_OK)
-  BADGE_ERROR = File.read(File.expand_path('../../static/error.svg', __FILE__)) unless defined?(BADGE_ERROR)
+  BADGE_OK = File.read(File.expand_path('../../public/images/ok.svg', __FILE__)) unless defined?(BADGE_OK)
+  BADGE_ERROR = File.read(File.expand_path('../../public/images/error.svg', __FILE__)) unless defined?(BADGE_ERROR)
   BADGE_BASE_WIDTH = 25 unless defined?(BADGE_BASE_WIDTH)
   BADGE_CELL_WIDTH = 25 unless defined?(BADGE_CELL_WIDTH)
   BADGE_COLORS = {

@@ -35,16 +35,42 @@ module CuttingEdge
   class App < Sinatra::Base
     include CuttingEdgeHelpers
 
+    set :views, ::File.join(::File.dirname(__FILE__), 'templates')
+    Tilt.register Tilt::ERBTemplate, 'html.erb'
+    set :public_folder, ::File.join(::File.dirname(__FILE__), 'public')
+
     logger filename: "#{settings.environment}.log", level: :trace
 
     before do
       @store = settings.store
     end
 
-    get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
+    get "/" do
+      @repos = CuttingEdge::App.repositories
+      erb :index
+    end
+
+    get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
       content_type :json
-      @store[@repo.identifier].merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+      data = @store[@repo.identifier]
+      if data 
+        data.merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+      else
+        status 500
+      end
+    end
+
+    get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
+      repo_defined?(source, org, name)
+      @name = name
+      @svg = url("/#{source}/#{org}/#{name}/svg")
+      @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
+      @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
+      @specs = @store[@repo.identifier]
+      @project_url = @repo.url_for_project
+      @language = @repo.lang
+      erb :info
     end
 
     get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|

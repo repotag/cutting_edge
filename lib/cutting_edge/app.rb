@@ -53,14 +53,19 @@ module CuttingEdge
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
       content_type :json
-      @store[@repo.identifier].merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+      data = @store[@repo.identifier]
+      if data 
+        data.merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+      else
+        status 500
+      end
     end
 
     get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
       repo_defined?(source, org, name)
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
-      @md = "[![Cutting Edge Dependency Status](#{@svg})](#{url("/#{source}/#{org}/#{name}/info")})"
+      @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
       @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
       @specs = @store[@repo.identifier]
       @project_url = @repo.url_for_project

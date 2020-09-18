@@ -24,7 +24,7 @@
 		<br/>
 
 	  <div class="pagehead">
-			<h1><a href="<%= @project_url %>"><%= @name %></a> (<%= @language %>)</h1>
+			<h1 class="text-gray"><a href="<%= @project_url %>" class="link-gray"><%= @name %></a> (<%= @language %>)</h1>
 		</div>
 						
 		<div class="TableObject">
@@ -53,32 +53,37 @@
 		<br/>
 
 
-		<% @specs[:locations].each do |filename, spec| %>
+		<% if @specs %>
+			<% @specs[:locations].each do |filename, spec| %>
 
-			<h3><%= filename %></h3>
-			<br/>
-			<div class="Box flex-auto">
-				<div class="Box-header Box-header--gray d-flex">
-					<div class="flex-auto col-md-2" role="gridcell"><b>Name</b></div>
-					<div class="flex-auto col-md-2" role="gridcell"><b>Required</b></div>
-					<div class="flex-auto col-md-2" role="gridcell"><b>Latest</b></div>
-					<div class="flex-auto col-md-2" role="gridcell"><b>Status</b></div>
-				</div>
-				<% spec.each do |type, dependencies| %>
-					<% next if dependencies.empty? %>
-					<% dependencies.each do |dependency| %>
-						<div class="Box-row Box-row--hover-gray d-flex" role="row">
-							<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
-							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
-							<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
-							<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= @colors.fetch(type, 'gray') %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
-						</div>
+				<h3><%= filename %></h3>
+				<br/>
+				<div class="Box flex-auto">
+					<div class="Box-header Box-header--gray d-flex">
+						<div class="flex-auto col-md-2" role="gridcell"><b>Name</b></div>
+						<div class="flex-auto col-md-2" role="gridcell"><b>Required</b></div>
+						<div class="flex-auto col-md-2" role="gridcell"><b>Latest</b></div>
+						<div class="flex-auto col-md-2" role="gridcell"><b>Status</b></div>
+					</div>
+					<% spec.each do |type, dependencies| %>
+						<% next if dependencies.empty? %>
+						<% dependencies.each do |dependency| %>
+							<div class="Box-row Box-row--hover-gray d-flex" role="row">
+								<div class="flex-auto col-md-2" role="gridcell"><a href="<%= dependency[:url] %>"><%= dependency[:name] %></a></div>
+								<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:required] %></div>
+								<div class="flex-auto col-md-2" role="gridcell"><%= dependency[:latest] %></div>
+								<div class="flex-auto col-md-2" role="gridcell"><span class="Label Label--<%= @colors.fetch(type, 'gray') %>"><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></span></div>
+							</div>
+						<% end %>
 					<% end %>
-				<% end %>
+				</div>
+				<br/>
+			<% end %>
+		<% else %>
+			<div class="Box border-dashed p-2 text text-gray text-center f-4">
+				Nothing to see here at the moment.
 			</div>
-			<br/>
 		<% end %>
-		
 		<%= erb :_footer %>
 	</div>
 	

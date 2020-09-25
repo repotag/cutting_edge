@@ -61,23 +61,8 @@ end
 # Only require the app after loading the optional config file, to give user the chance to define constants.
 require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 
-projects = ARGV[0] || 'projects.yml'
-repositories = {}
-begin
-  YAML.load(File.read(projects)).each do |source, orgs|
-    orgs.each do |org, value|
-      value.each do |name, settings|
-        cfg = settings.is_a?(Hash) ? settings : {}
-        repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
-        repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
-        repositories["#{source}/#{org}/#{name}"] = repo
-      end
-    end
-  end
-rescue SyntaxError, Errno::ENOENT => e
-  puts "Error: #{projects} does not contain a valid YAML project definition."
-  exit 1
-end
+include CuttingEdgeHelpers
+repositories = load_repositories(ARGV[0] || 'projects.yml')
 
 CuttingEdge::STORE = Moneta.new(:Memory) unless defined?(CuttingEdge::STORE)
 CuttingEdge::App.set(:store, CuttingEdge::STORE)
@@ -95,7 +80,6 @@ scheduler.every(CuttingEdge::REFRESH_SCHEDULE) do
 end
 
 puts 'Running Workers a first time...'
-include CuttingEdgeHelpers
 worker_fetch_all(repositories.values)
 
 CuttingEdge::App.run!(options)

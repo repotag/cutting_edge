@@ -5,8 +5,11 @@ gem 'mail'
 
 gem 'hashdiff'
 
-gem 'rspec', '~> 3.9', :group => :development
-gem 'simplecov', :group => :development
+group :development do
+  gem 'rspec', '~> 3.9'
+  gem 'simplecov'
+  gem 'rack-test'
+end
 
 gem 'coveralls', '~>0.8.23', require: false
 

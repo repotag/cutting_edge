@@ -22,6 +22,30 @@ module CuttingEdgeHelpers
   def worker_fetch(repo)
     DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types, repo.contact_email)
   end
+  
+  def load_repositories(path)
+    repositories = {}
+    begin
+      YAML.load(File.read(path)).each do |source, orgs|
+        orgs.each do |org, value|
+          value.each do |name, settings|
+            cfg = settings.is_a?(Hash) ? settings : {}
+            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
+            repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
+            repositories["#{source}/#{org}/#{name}"] = repo
+          end
+        end
+      end
+    rescue SyntaxError, Errno::ENOENT => e
+      puts "Error: #{path} does not contain a valid YAML project definition."
+      if ENV['RACK_ENV'] == 'test'
+        return nil
+      else
+        exit 1
+      end
+    end
+    repositories
+  end
 end
 
 module CuttingEdge
@@ -45,7 +69,7 @@ module CuttingEdge
       @store = settings.store
     end
 
-    get "/" do
+    get '/' do
       @repos = CuttingEdge::App.repositories
       erb :index
     end
@@ -54,8 +78,8 @@ module CuttingEdge
       repo_defined?(source, org, name)
       content_type :json
       data = @store[@repo.identifier]
-      if data 
-        data.merge({:language => @repo.lang}).to_json # Todo: check whether value exists yet? If not, call worker / wait / timeout?
+      if data
+        data.merge({:language => @repo.lang}).to_json
       else
         status 500
       end

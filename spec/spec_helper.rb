@@ -1,10 +1,13 @@
 require 'simplecov'
 require 'fixtures'
+require 'rack/test'
 
 if ENV['TRAVIS']
   require 'coveralls'
   Coveralls.wear!
 end
+
+ENV['RACK_ENV'] = 'test'
 
 require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 CuttingEdge::App.set(:enable_logging, false)
@@ -109,4 +112,8 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
+
+  config.include Rack::Test::Methods
+  config.include ::CuttingEdgeHelpers
+  config.include ::WorkerHelpers
 end

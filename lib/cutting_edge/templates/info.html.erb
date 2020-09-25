@@ -53,7 +53,7 @@
 		<br/>
 
 
-		<% if @specs %>
+		<% if @specs && @specs[:locations] %>
 			<% @specs[:locations].each do |filename, spec| %>
 
 				<h3><%= filename %></h3>

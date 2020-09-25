@@ -30,7 +30,7 @@ class MailWorker < GenericWorker
         body  ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
           project: identifier,
           url: CuttingEdge::SERVER_URL,
-          dependencies: dependencies
+          specs: dependencies
         )
       end
     end

@@ -1,9 +1,11 @@
+<html>
+<body>
 <p>
-This is <a href="<%= url %>">CuttingEdge</a> informing you that the dependency status for <%= project_name %> has changed.
+This is <a href="<%= url %>">CuttingEdge</a> informing you that the dependency status for <b><%= project %></b> has changed. For more information, see:
+<br/>
+<a href="<%= "#{url}/#{project}/info" %>">Dependency Status</a>
+</br>
+Have a nice day!
 </p>
-
-<p>
-<% dependencies[:locations].each do |location, groups| %>
-In <%= location %>: <%= groups %>
-<% end %>
-</p>
+</body>
+</html>

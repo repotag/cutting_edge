@@ -28,7 +28,7 @@ class MailWorker < GenericWorker
       html_part do
         content_type 'text/html; charset=UTF-8'
         body  ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
-          project_name: identifier,
+          project: identifier,
           url: CuttingEdge::SERVER_URL,
           dependencies: dependencies
         )

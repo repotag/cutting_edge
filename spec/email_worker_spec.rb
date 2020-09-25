@@ -35,7 +35,6 @@ describe MailWorker do
     html_body = body.parts.last.to_s
     expect(html_body).to start_with('Content-Type: text/html')
     expect(html_body).to include('This is <a href="http://localhost">CuttingEdge</a> informing you')
-    expect(html_body).to include('In gollum.gemspec: {:outdated_major=>[{:name=>"mustache",')
-    expect(html_body).to include('In Gemfile: {:outdated_major=>[{:name=>"rake", ')
+    expect(html_body).to include("<a href=\"http://localhost/#{identifier}/info\">Dependency Status</a>")
   end
 end

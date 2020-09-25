@@ -4,7 +4,7 @@
 # module CuttingEdge
 #   REFRESH_SCHEDULE = '1h'  # How often to run workers to check for changes to dependency status. Examples of valid values: '10d', '10m', etc.
 #   SERVER_HOST = 'mydependencymonitoring.com' # At what domain is this CuttingEdge instance running? Defaults to 'localhost'
-#   SERVER_URL = "https://#{SERVER_HOST}" # The URL used to refer to this CuttingEdge instance, for instance in e-mails. Defaults to 'http://#{SERVER_HOST}' 
+#   SERVER_URL = "https://#{SERVER_HOST}:4567" # The URL used to refer to this CuttingEdge instance, for instance in e-mails. Defaults to 'http://#{SERVER_HOST}' 
 # 
 #   MAIL_TO = 'mydeps@mymail.com'  # Default address to send email to. If set to false (=default!), don't send any e-mails except for repositories that have their 'email:' attribute set in projects.yml
 #   MAIL_FROM = "cutting_edge@#{SERVER_HOST}" # From Address used for sending e-mails. Default: "cutting_edge@#{SERVER_HOST}" 

@@ -51,14 +51,13 @@ module CuttingEdge
     DEPENDENCY_TYPES = [:runtime] # Which dependency types to accept (default only :runtime, excludes :development).
     DEFAULT_LANG = 'ruby'
 
-    attr_reader :token, :locations, :lang, :contact_email
+    attr_reader :locations, :lang, :contact_email
     attr_accessor :dependency_types
 
-    def initialize(org, name, lang = nil, locations = nil, branch = nil, token = nil, contact_email = nil)
+    def initialize(org, name, lang = nil, locations = nil, branch = nil, contact_email = nil)
       @org     = org
       @name    = name
       @branch  = branch  || 'master'
-      @token   = token
       @lang    = lang || DEFAULT_LANG
       @contact_email = contact_email
       @locations = {}

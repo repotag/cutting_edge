@@ -53,6 +53,12 @@ describe CuttingEdge::App do
   
   context 'refreshing' do
     let(:project) { 'github/gollum/gollum' }
+    before {
+      ::CuttingEdge::SECRET_TOKEN = 'secret'
+    }
+    after {
+      CuttingEdge.send(:remove_const, :SECRET_TOKEN)
+    }
     it 'fails with wrong token' do
       response = post "/#{project}/refresh", :token => 'fail'
       expect(response.status).to eq 401

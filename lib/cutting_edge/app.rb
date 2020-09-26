@@ -30,7 +30,7 @@ module CuttingEdgeHelpers
         orgs.each do |org, value|
           value.each do |name, settings|
             cfg = settings.is_a?(Hash) ? settings : {}
-            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('api_token', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
+            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
             repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
             repositories["#{source}/#{org}/#{name}"] = repo
           end
@@ -105,7 +105,7 @@ module CuttingEdge
 
     post %r{/(.+)/(.+)/(.+)/refresh} do |source, org, name|
       repo_defined?(source, org, name)
-      if @repo.token && params[:token] == @repo.token
+      if defined?(::CuttingEdge::SECRET_TOKEN) && params[:token] == ::CuttingEdge::SECRET_TOKEN
         worker_fetch(@repo)
         status 200
       else

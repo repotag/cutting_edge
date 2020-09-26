@@ -23,7 +23,6 @@ s.add_dependency 'http', '~> 4.3'
 s.add_dependency 'sucker_punch', '~> 2.1'
 s.add_dependency 'sinatra', '~> 2.0'
 s.add_dependency 'moneta', '~> 1.2'
-s.add_dependency 'victor', '~> 0.2.8'
 s.add_dependency 'rufus-scheduler', '~> 3.6'
 s.add_dependency 'sinatra-logger', '~> 0.3'
 s.add_dependency 'toml-rb', '~> 2.0'
@@ -63,7 +62,6 @@ describe RubyLang do
       'sucker_punch': Gem::Version.new('2.1.2'),
       'sinatra': Gem::Version.new('2.1.0'),
       'moneta': Gem::Version.new('1.4.0'),
-      'victor': Gem::Version.new('0.3.2'),
       'rufus-scheduler': Gem::Version.new('3.6.0'),
       'sinatra-logger': Gem::Version.new('0.3.2'),
       'toml-rb': Gem::Version.new('2.0.1'),
@@ -89,7 +87,7 @@ describe RubyLang do
   it 'parses gemspec' do
     expect(RubyLang).to receive(:latest_version).and_return(*gemspec_latest_versions.values)
     results = RubyLang.parse_file('test.gemspec', GEMSPEC)
-    expect(results.length).to eq 9
+    expect(results.length).to eq 8
     expect(results.last.first).to be_a Bundler::Dependency
     expect(results.last.first.name).to eq 'toml-rb'
     expect(results.last.last).to be_a Gem::Version

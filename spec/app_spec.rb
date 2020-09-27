@@ -53,12 +53,6 @@ describe CuttingEdge::App do
   
   context 'hidden repos' do
     let(:project) { 'gitlab/gitlab-org/gitlab-foss' }
-    it 'does not show info for hidden repo' do
-      response = get("#{project}/info")
-      expect(response.status).to eq 404
-      response = get("#{project}/info/json")
-      expect(response.status).to eq 404
-    end
     
     it 'does not list hidden repos on the landing page' do
       response = get('/')

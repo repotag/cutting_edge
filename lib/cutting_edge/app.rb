@@ -76,7 +76,6 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
-      repo_hidden?
       content_type :json
       data = @store[@repo.identifier]
       if data
@@ -88,7 +87,6 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
       repo_defined?(source, org, name)
-      repo_hidden?
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
       @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
@@ -123,10 +121,6 @@ module CuttingEdge
 
     def repo_defined?(source, org, name)
       not_found unless @repo = settings.repositories["#{source}/#{org}/#{name}"]
-    end
-    
-    def repo_hidden?
-      not_found if @repo.hidden?
     end
     
   end

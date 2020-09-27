@@ -1,10 +1,25 @@
 describe CuttingEdge::Repository do
+  
+  it 'is capable of being hidden' do
+    expect(CuttingEdge::Repository.new('org', 'name').hidden?).to be false
+    expect(CuttingEdge::Repository.new('org', 'name', nil, nil, nil, nil, nil, true).hidden?).to be true
+  end
+  
+  it 'has a headers method' do
+    expect(CuttingEdge::Repository.headers(nil)).to eq ({})
+  end
+  
   context 'GitHub' do
+    it 'has a headers method' do
+      expect(CuttingEdge::GithubRepository.headers(nil)).to eq ({:accept => 'application/vnd.github.v3.raw'})
+      expect(CuttingEdge::GithubRepository.headers('token')).to eq ({:accept => 'application/vnd.github.v3.raw', :authorization => 'token token'})
+    end
+    
     it 'defines a class for GitHub.com' do
       expect(CuttingEdge::GithubRepository).to_not be_nil
       github = CuttingEdge::GithubRepository.new('org', 'name')
       expect(github.source).to eq 'github'
-      expect(github.url_for_file('file')).to eq 'https://raw.githubusercontent.com/org/name/master/file'
+      expect(github.url_for_file('file')).to eq 'https://api.github.com/repos/org/name/contents/file?ref=master'
       expect(github.url_for_project).to eq 'https://github.com/org/name'
     end
   end
@@ -13,9 +28,11 @@ describe CuttingEdge::Repository do
   
     it 'defines a class for GitLab.com' do
       expect(CuttingEdge::GitlabRepository).to_not be_nil
+      expect(CuttingEdge::GitlabRepository.headers(nil)).to eq ({})
+      expect(CuttingEdge::GitlabRepository.headers('token')).to eq ({:authorization => 'Bearer token'})
       gitlab = CuttingEdge::GitlabRepository.new('org', 'name')
       expect(gitlab.source).to eq 'gitlab'
-      expect(gitlab.url_for_file('file')).to eq 'https://gitlab.com/org/name/raw/master/file'
+      expect(gitlab.url_for_file('file')).to eq 'https://gitlab.com/api/v4/projects/org%2fname/repository/files/file/raw?ref=master'
       expect(gitlab.url_for_project).to eq 'https://gitlab.com/org/name'
     end
     
@@ -25,7 +42,7 @@ describe CuttingEdge::Repository do
       expect(defined?(CuttingEdge::GiteaRepository)).to_not be_nil
       gitea = CuttingEdge::GiteaRepository.new('org', 'name')
       expect(gitea.source).to eq 'gitea'
-      expect(gitea.url_for_file('file')).to eq 'https://mydependencymonitoring.com/org/name/raw/branch/master/file'
+      expect(gitea.url_for_file('file')).to eq 'https://mydependencymonitoring.com/api/v1/repos/org/name/raw/master/file'
       expect(gitea.url_for_project).to eq 'https://mydependencymonitoring.com/org/name'
     end
   end

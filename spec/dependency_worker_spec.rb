@@ -34,19 +34,39 @@ describe DependencyWorker do
     let(:response_ok) { MockResponse.new(200, 'body') }
     let(:response_not_found) { MockResponse.new(404, 'Not found') }
     let(:url) { locations.first.last }
+    before {
+      worker.instance_variable_set(:@provider, ::CuttingEdge::GitlabRepository)
+    }
+    
+    it 'uses default headers' do
+      worker.instance_variable_set(:@provider, ::CuttingEdge::GithubRepository)
+      expect(HTTP).to receive(:headers).with({:accept => 'application/vnd.github.v3.raw'}).exactly(:once).and_call_original
+      expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_return(response_ok)
+      expect(worker.send(:http_get, url)).to eq 'body'
+    end
 
     it 'returns body when http get is successful' do
-      expect(HTTP).to receive(:get).with(url).and_return(response_ok)
+      expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_return(response_ok)
+      expect(worker.send(:http_get, url)).to eq 'body'
+    end
+    
+    it 'uses an auth header when it is set for project' do
+      token = 'token'
+      header = "Bearer #{token}"
+      worker.instance_variable_set(:@auth_token, token)
+      expect(::CuttingEdge::GitlabRepository).to receive(:headers).with(token).exactly(:once).and_call_original
+      expect(HTTP).to receive(:headers).with(:authorization => 'Bearer token').exactly(:once).and_call_original
+      expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_return(response_ok)
       expect(worker.send(:http_get, url)).to eq 'body'
     end
     
     it 'returns body when http get is unsuccessful' do
-      expect(HTTP).to receive(:get).with(url).and_return(response_not_found)
+      expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_return(response_not_found)
       expect(worker.send(:http_get, url)).to be_nil
     end
         
     it 'handles a timeout' do
-      expect(HTTP).to receive(:get).with(url).and_raise(HTTP::TimeoutError)
+      expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_raise(HTTP::TimeoutError)
       expect(worker).to receive(:log_info)
       expect(worker.send(:http_get, url)).to be_nil
     end

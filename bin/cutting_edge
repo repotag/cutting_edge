@@ -63,6 +63,7 @@ require File.expand_path('../../lib/cutting_edge/app.rb', __FILE__)
 
 include CuttingEdgeHelpers
 repositories = load_repositories(ARGV[0] || 'projects.yml')
+repositories.merge!(CuttingEdge::REPOSITORIES) if defined?(CuttingEdge::REPOSITORIES)
 
 CuttingEdge::STORE = Moneta.new(:Memory) unless defined?(CuttingEdge::STORE)
 CuttingEdge::App.set(:store, CuttingEdge::STORE)

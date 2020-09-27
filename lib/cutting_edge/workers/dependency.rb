@@ -11,9 +11,11 @@ class DependencyWorker < GenericWorker
   STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
 
-  def perform(identifier, lang, locations, dependency_types, to_addr)
+  def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
     log_info 'Running Worker!'
     @lang = get_lang(lang)
+    @provider = get_provider(identifier)
+    @auth_token = auth_token
     old_dependencies = get_from_store(identifier)
     begin
       dependencies = {:locations => {}}
@@ -94,10 +96,14 @@ class DependencyWorker < GenericWorker
   def get_lang(lang)
     Object.const_get("#{lang.capitalize}Lang")
   end
+  
+  def get_provider(identifier)
+    ::CuttingEdge.const_get("#{identifier.split('/').first.capitalize}Repository")
+  end
 
   def http_get(url)
     begin
-      response = HTTP.get(url)
+      response = HTTP.headers(@provider.headers(@auth_token)).get(url)
       response.status == 200 ? response.to_s : nil
     rescue HTTP::TimeoutError => e
       log_info("Encountered error when fetching latest version of #{url}: #{e.class} #{e.message}")

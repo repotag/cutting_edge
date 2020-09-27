@@ -36,4 +36,12 @@
 #   #       language: rust
 #   #     ruby_project:
 #   #       language ruby
+
+# # You may also define additional repositories programatically as follows.
+# # These will be added to the repositories defined in projects.yml.
+# # This may be useful, for instance, if you want to use environment variables to keep information secret.
+# # Note: you need to require './lib/cutting_edge/repo.rb' first
+#   REPOSITORIES = {
+#     "gitlab/#{ENV['PRIVATE_REPO1_ORG']}/#{ENV['PRIVATE_REPO1_NAME']}" => GitlabRepo.new(ENV['PRIVATE_REPO1_ORG'], ENV['PRIVATE_REPO1_NAME'], 'python', nil, nil, nil, ENV['PRIVATE_REPO1_TOKEN'], true) # The final argument sets the repository to 'hidden', so it will not show up in the listing.
+#   }
 # end

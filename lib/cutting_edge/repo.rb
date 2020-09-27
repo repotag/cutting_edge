@@ -1,7 +1,7 @@
 require File.expand_path('../langs.rb', __FILE__)
 
 module CuttingEdge
-  module RepositoryMixin
+  module RepositoryMixin    
     def host
       self.class.class_variable_get(:@@host)
     end
@@ -16,7 +16,7 @@ module CuttingEdge
       end
     end
     
-    module ClassMethods
+    module ClassMethods       
       def set_source(source)
         class_variable_set(:@@source, source)
       end
@@ -27,13 +27,41 @@ module CuttingEdge
     end
   end
   
-  module GitlabMixin
+  module GithubMixin
+    class << self
+      def included(base)
+        base.extend ClassMethods
+      end
+    end
+    
+    module ClassMethods
+      def headers(auth_token)
+        headers = {:accept => 'application/vnd.github.v3.raw'}
+        headers[:authorization] = "token #{auth_token}" if auth_token
+        headers
+      end
+    end
+  end
+  
+  module GitlabMixin    
     def url_for_project
       File.join(host, @org, @name)
     end
     
     def url_for_file(file)
-      File.join(host, @org, @name, 'raw', @branch, file)
+      File.join(host, '/api/v4/projects', "#{@org}%2f#{@name}", 'repository/files/', file.gsub('/', '%2f'), "raw?ref=#{@branch}")
+    end
+    
+    class << self
+      def included(base)
+        base.extend ClassMethods
+      end
+    end
+    
+    module ClassMethods
+      def headers(auth_token)
+        auth_token ? {:authorization => "Bearer #{auth_token}"} : {}
+      end
     end
   end
   
@@ -43,7 +71,7 @@ module CuttingEdge
     end
     
     def url_for_file(file)
-      File.join(host, @org, @name, 'raw', 'branch', @branch, file)
+      File.join(host, 'api/v1/repos', @org, @name, 'raw', @branch, file)
     end
   end
   
@@ -51,13 +79,21 @@ module CuttingEdge
     DEPENDENCY_TYPES = [:runtime] # Which dependency types to accept (default only :runtime, excludes :development).
     DEFAULT_LANG = 'ruby'
 
-    attr_reader :locations, :lang, :contact_email
+    attr_reader :locations, :lang, :contact_email, :auth_token
     attr_accessor :dependency_types
+    
+    class << self
+      def headers(auth_token)
+        {}
+      end
+    end
 
-    def initialize(org, name, lang = nil, locations = nil, branch = nil, contact_email = nil)
+    def initialize(org, name, lang = nil, locations = nil, branch = nil, contact_email = nil, auth_token = nil, hide = false)
       @org     = org
       @name    = name
+      @auth_token = auth_token
       @branch  = branch  || 'master'
+      @hidden  = hide
       @lang    = lang || DEFAULT_LANG
       @contact_email = contact_email
       @locations = {}
@@ -65,6 +101,10 @@ module CuttingEdge
         @locations[loc] = url_for_file(loc)
       end
       @dependency_types = DEPENDENCY_TYPES
+    end
+    
+    def hidden?
+      @hidden
     end
 
     def source
@@ -91,7 +131,9 @@ module CuttingEdge
   end
 
   class GithubRepository < Repository
-    HOST = 'https://raw.githubusercontent.com'
+    include CuttingEdge::GithubMixin
+    
+    HOST = 'https://api.github.com'
     
     def source
       'github'
@@ -102,7 +144,7 @@ module CuttingEdge
     end
 
     def url_for_file(file)
-      File.join(HOST, @org, @name, @branch, file)
+      File.join(HOST, 'repos', @org, @name, 'contents', "#{file}?ref=#{@branch}")
     end
   end  
 end

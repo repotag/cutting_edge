@@ -21,8 +21,7 @@ class BadgeWorker < GenericWorker
   def perform(identifier)
     log_info 'Running Worker!'
     dependencies = get_from_store(identifier)
-    
-    if dependencies && !dependencies.empty?
+    if dependencies && !dependencies.empty? && !(dependencies[:outdated] == :unknown)
       result = if dependencies[:outdated] == :up_to_date
         CuttingEdge::BADGE_OK
       else

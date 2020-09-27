@@ -51,6 +51,22 @@ describe CuttingEdge::App do
     end
   end
   
+  context 'hidden repos' do
+    let(:project) { 'gitlab/gitlab-org/gitlab-foss' }
+    it 'does not show info for hidden repo' do
+      response = get("#{project}/info")
+      expect(response.status).to eq 404
+      response = get("#{project}/info/json")
+      expect(response.status).to eq 404
+    end
+    
+    it 'does not list hidden repos on the landing page' do
+      response = get('/')
+      expect(response.body).to include('team-chess-ruby')
+      expect(response.body).not_to include('gitlab-foss')
+    end
+  end
+  
   context 'refreshing' do
     let(:project) { 'github/gollum/gollum' }
     before {

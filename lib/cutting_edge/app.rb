@@ -20,7 +20,7 @@ module CuttingEdgeHelpers
   end
 
   def worker_fetch(repo)
-    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types, repo.contact_email)
+    DependencyWorker.perform_async(repo.identifier, repo.lang, repo.locations, repo.dependency_types, repo.contact_email, repo.auth_token)
   end
   
   def load_repositories(path)
@@ -30,7 +30,7 @@ module CuttingEdgeHelpers
         orgs.each do |org, value|
           value.each do |name, settings|
             cfg = settings.is_a?(Hash) ? settings : {}
-            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('email', CuttingEdge::MAIL_TO))
+            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('email', CuttingEdge::MAIL_TO), cfg.fetch('auth_token', nil), cfg.fetch('hide', false))
             repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
             repositories["#{source}/#{org}/#{name}"] = repo
           end
@@ -70,12 +70,13 @@ module CuttingEdge
     end
 
     get '/' do
-      @repos = CuttingEdge::App.repositories
+      @repos = CuttingEdge::App.repositories.select {|_, repo| !repo.hidden?}
       erb :index
     end
 
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
+      repo_hidden?
       content_type :json
       data = @store[@repo.identifier]
       if data
@@ -87,6 +88,7 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
       repo_defined?(source, org, name)
+      repo_hidden?
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
       @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
@@ -114,10 +116,18 @@ module CuttingEdge
     end
 
     private
-
-    def repo_defined?(source, org, name)
-      halt 404, '404 Not Found' unless @repo = settings.repositories["#{source}/#{org}/#{name}"]
+    
+    def not_found
+      halt 404, '404 Not Found'
     end
 
+    def repo_defined?(source, org, name)
+      not_found unless @repo = settings.repositories["#{source}/#{org}/#{name}"]
+    end
+    
+    def repo_hidden?
+      not_found if @repo.hidden?
+    end
+    
   end
 end

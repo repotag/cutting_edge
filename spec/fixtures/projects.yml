@@ -2,15 +2,15 @@
 # For more information and options, see: https://github.com/repotag/cutting_edge
 
 github:
+  repotag:
+    cutting_edge:
+      language: ruby
   gollum:
     gollum:
-      api_token: secret
-      email: false
+      language: ruby
     gollum-lib:
-      api_token: secret
       locations: [gemspec.rb]
       dependency_types: [runtime, development]
-      email: gollum@mydependencymonitoring.com
   singingwolfboy:
     flask-dance:
       language: python
@@ -18,9 +18,10 @@ github:
   rust-lang:
     crates.io:
       language: rust
-      api_token: secret
 gitlab:
   cthowl01:
     team-chess-ruby:
       locations: [Gemfile]
-      api_token: secret
+  gitlab-org:
+    gitlab-foss:
+      hide: true

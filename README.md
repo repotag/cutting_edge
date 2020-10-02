@@ -48,7 +48,100 @@ An instance on Heroku will be accessible through:
 
 ### projects.yml
 
+Explain language, locations key.
+
 ### config.rb
+
+### E-mail Notifications
+
+### Defining your own git repository server
+
+You can monitor projects on your own, self-hosted Gitlab or Gitea instances. To do so, you need to tell CuttingEdge about your server by editing `config.rb` as follows:
+
+```ruby
+module CuttingEdge
+    require './lib/cutting_edge/repo.rb'
+    define_gitlab_server('mygitlab', 'https://mygitlab.com')
+    define_gitea_server('mygitea', 'https://mygitea.com')
+end
+```
+
+This will allow you to use the `mygitlab:` and `mygitea:` keys in `projects.yml`, for instance like so:
+
+```yaml
+github:
+   repotag:
+     cutting_edge:
+       lang: ruby
+mygitlab:
+  myorg:
+    project-name:
+      lang: rust
+mygitea:
+  myorg2:
+    project-name2:
+      lang: python
+```
+
+Don't forget to run CuttingEdge with the `--config` option!
+
+### Authorization and private repositories
+
+If you want to monitor dependencies in a private (e.g. GitHub or Gitlab) project, you can instruct CuttingEdge to use an API token for accessing the dependency files. In `projects.yml`:
+
+```yaml
+github:
+   secret-org:
+     secret-repo:
+       auth_token: 'mysecrettoken'
+```
+
+For info on geneating API tokens, see:
+
+* [GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
+* [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+* [Gitea](https://docs.gitea.io/en-us/api-usage/)
+
+If you don't want to expose your API token in `project.yml` (**which you shouldn't** when it is publicly accessible on the internet), you can instead define your project repository programatically in `config.rb`. This will allow you to set secrets (auth_token, but if desired also name and org of the repository) by (for instance) utilising environment variables:
+
+```ruby
+module CuttingEdge
+    require './lib/cutting_edge/repo.rb'
+    REPOSITORIES = {
+      "gitlab/#{ENV['SECRET_REPO1_ORG']}/#{ENV['SECRET_REPO1_NAME']}" => GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_TOKEN'], hide: true)
+    }
+end
+```
+
+Setting the `hide` key to true will ensure your private repo is not listed in the web frontend, unless you enter your CuttingEdge secret token on the landing page.
+
+This approach is especially useful on Heroku, where you can use [Heroku config variables](https://devcenter.heroku.com/articles/config-vars).
+
+# Refreshing dependency status through git hooks
+
+CuttingEdge by default checks whether the status of your dependencies has changed once every hour. However, if you wish, you can also setup hooks so that dependency status is checked (for instance) whenever you make a commit to your project.
+
+For this purpose, CuttingEdge provides the following route:
+
+```
+http://mycuttingedge.com/github/org/myproject/refresh?token=mysecrettoken
+```
+
+An HTTP `POST` request to that route will cause the dependencies for that project to refresh. This requires you to define a secret token in `config.rb`, so that third parties cannot trigger refreshes. In `config.rb`:
+
+```ruby
+module CuttingEdge
+  CuttingEdge::SECRET_TOKEN = 'mysecrettoken' # Note: this token is used to refresh all the projects on your CuttingEdge instance
+end
+```
+
+Using this route you can, for instance, set up a [GitHub Action](https://docs.github.com/en/free-pro-team@latest/actions) (or equivalent for other providers). Of course, this requires defining the secret token as (for instance) a [GitHub Secret](https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets).
+
+You can test the route like this:
+
+```
+curl -d 'token=mysecrettoken' http://mycuttingedge.com/github/org/myproject/refresh
+```
 
 ## Contributing
 

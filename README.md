@@ -7,8 +7,8 @@
 CuttingEdge monitors the status of the dependencies of your projects and lets you know when any of them go out of date. It:
 
 * Generates badge images that you can include in your projects' Readme, like the one above!
-* Can send you e-mail when the status of a project's dependencies changes
-* Serves a simple [info page](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info) detailing the status for each project
+* Can send you email when the status of a project's dependencies changes
+* Serves a simple [info page](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info) detailing the status of each project
 * Supports the following languages:
   * Ruby
   * Python
@@ -18,8 +18,9 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * GitHub
   * Gitlab (both gitlab.com and self-hosted instances)
   * Gitea (self-hosted)
+  * Both public and [private repositories](#Authorization-and-private-repositories)
 
-Moreover, CuttingEdge is light weight and easy to deploy: 
+Moreover, CuttingEdge is lightweight and easy to deploy: 
 
 * No database required
 * Simple configuration through a `projects.yml` file
@@ -28,9 +29,35 @@ Moreover, CuttingEdge is light weight and easy to deploy:
 
 By default, CuttingEdge refreshes the status of your projects' dependencies every hour, but this (and other such settings) can easily be configured in `config.rb`.
 
-**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/).**
+**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**
 
 ## Installation
+
+`gem install cutting_edge`
+
+Or run from source:
+
+```
+git clone https://github.com/repotag/cutting_edge.git
+cd cutting_edge
+bundle install
+bundle exec cutting_edge
+```
+
+Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
+
+### Deploying on Heroku
+
+CuttingEdge runs out of the box on Heroku, and is lightweight enough to function on the Heroku free plan. We recommend you:
+
+1. Clone/fork [this](ADD URL TO HEROKU EXAMPLE) repository, as it already contains some `config.rb` settings relevant to Heroku
+2. Edit `projects.yml` and commit it to the repo
+3. `heroku create my-cuttingedge`
+4. `git push heroku master`
+
+You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `config.rb`.
+
+## Usage
 
 When your instance of CuttingEdge is running, you can visit the landing page by pointing your browser to the root URL of the app. Locally, it is by default accessible at:
 
@@ -42,17 +69,13 @@ An instance on Heroku will be accessible through:
 
 `https://your-app-name.herokuapp.com/`
 
-### Deploying on Heroku
-
-## Usage
-
 ### projects.yml
 
 Explain language, locations key.
 
 ### config.rb
 
-### E-mail Notifications
+### Email Notifications
 
 ### Defining your own git repository server
 
@@ -96,7 +119,7 @@ github:
        auth_token: 'mysecrettoken'
 ```
 
-For info on geneating API tokens, see:
+For info on generating API tokens, see:
 
 * [GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
 * [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)

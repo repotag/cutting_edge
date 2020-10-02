@@ -22,7 +22,7 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Gitea (self-hosted)
   * Both public and [private repositories](#Authorization-and-private-repositories)
 
-**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**
+**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**.
  
 ## Requirements
 

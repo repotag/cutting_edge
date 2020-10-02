@@ -42,6 +42,6 @@
 # # This may be useful, for instance, if you want to use environment variables to keep information secret.
 # # Note: you need to require './lib/cutting_edge/repo.rb' first
 #   REPOSITORIES = {
-#     "gitlab/#{ENV['PRIVATE_REPO1_ORG']}/#{ENV['PRIVATE_REPO1_NAME']}" => GitlabRepo.new(ENV['PRIVATE_REPO1_ORG'], ENV['PRIVATE_REPO1_NAME'], 'python', nil, nil, nil, ENV['PRIVATE_REPO1_TOKEN'], true) # The final argument sets the repository to 'hidden', so it will not show up in the listing.
+#     "gitlab/#{ENV['PRIVATE_REPO1_ORG']}/#{ENV['PRIVATE_REPO1_NAME']}" => GitlabRepository.new(org: ENV['PRIVATE_REPO1_ORG'], name: ENV['PRIVATE_REPO1_NAME'], lang: 'python', auth_token: ENV['PRIVATE_REPO1_TOKEN'], hide: true)
 #   }
 # end

@@ -88,14 +88,14 @@ module CuttingEdge
       end
     end
 
-    def initialize(org, name, lang = nil, locations = nil, branch = nil, contact_email = nil, auth_token = nil, hide = false)
+    def initialize(org:, name:, lang: nil, locations: nil, branch: nil, email: nil, auth_token: nil, hide: false)
       @org     = org
       @name    = name
       @auth_token = auth_token
       @branch  = branch  || 'master'
       @hidden  = hide
       @lang    = lang || DEFAULT_LANG
-      @contact_email = contact_email
+      @contact_email = email
       @locations = {}
       (locations || get_lang(@lang).locations(name)).each do |loc|
         @locations[loc] = url_for_file(loc)

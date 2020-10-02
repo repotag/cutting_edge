@@ -30,7 +30,7 @@ module CuttingEdgeHelpers
         orgs.each do |org, value|
           value.each do |name, settings|
             cfg = settings.is_a?(Hash) ? settings : {}
-            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org, name, cfg.fetch('language', nil), cfg.fetch('locations', nil), cfg.fetch('branch', nil), cfg.fetch('email', CuttingEdge::MAIL_TO), cfg.fetch('auth_token', nil), cfg.fetch('hide', false))
+            repo = Object.const_get("CuttingEdge::#{source.capitalize}Repository").new(org: org, name: name, lang: cfg.fetch('language', nil), locations: cfg.fetch('locations', nil), branch: cfg.fetch('branch', nil), email: cfg.fetch('email', CuttingEdge::MAIL_TO), auth_token: cfg.fetch('auth_token', nil), hide: cfg.fetch('hide', false))
             repo.dependency_types = cfg['dependency_types'].map {|dep| dep.to_sym} if cfg['dependency_types'].is_a?(Array)
             repositories["#{source}/#{org}/#{name}"] = repo
           end

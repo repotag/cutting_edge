@@ -24,7 +24,7 @@ Moreover, CuttingEdge is lightweight and easy to deploy:
 
 * No database required
 * Simple configuration through a `projects.yml` file
-* Requires relatively few resources (~120MB RAM), so..
+* Requires relatively few resources (~120MB RAM), so...
 * It can even run on Heroku's free plan!
 
 By default, CuttingEdge refreshes the status of your projects' dependencies every hour, but this (and other such settings) can easily be configured in `config.rb`.

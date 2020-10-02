@@ -35,15 +35,20 @@ CuttingEdge is lightweight and easy to deploy:
 
 ## Installation
 
-`gem install cutting_edge`
+Simply:
+
+```
+$ gem install cutting_edge
+$ cutting_edge
+```
 
 Or run from source:
 
 ```
-git clone https://github.com/repotag/cutting_edge.git
-cd cutting_edge
-bundle install
-bundle exec cutting_edge
+$ git clone https://github.com/repotag/cutting_edge.git
+$ cd cutting_edge
+$ bundle install
+$ bundle exec cutting_edge
 ```
 
 Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).

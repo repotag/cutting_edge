@@ -4,7 +4,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=master)](https://coveralls.io/github/repotag/cutting_edge?branch=master)
 [![Cutting Edge Dependency Status](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info)
 
-CuttingEdge monitors the status of the dependencies of your projects and lets you know when any of them go out of date. It:
+CuttingEdge monitors the status of the dependencies of your projects and lets you know when any of them go out of date.
+
+## Features
 
 * Generates badge images that you can include in your projects' Readme, like the one above!
 * Can send you email when the status of a project's dependencies changes
@@ -20,16 +22,16 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Gitea (self-hosted)
   * Both public and [private repositories](#Authorization-and-private-repositories)
 
-Moreover, CuttingEdge is lightweight and easy to deploy: 
+**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**
+ 
+## Requirements
+
+CuttingEdge is lightweight and easy to deploy: 
 
 * No database required
 * Simple configuration through a `projects.yml` file
 * Requires relatively few resources (~120MB RAM), so...
 * It can even run on Heroku's free plan!
-
-By default, CuttingEdge refreshes the status of your projects' dependencies every hour, but this (and other such settings) can easily be configured in `config.rb`.
-
-**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**
 
 ## Installation
 

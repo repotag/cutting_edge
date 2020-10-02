@@ -1,5 +1,5 @@
 REQUIREMENT_TXT = <<EOF
-requests>=2.0
+requests   >=  2.0
 oauthlib
 requests-oauthlib>=1.0.0 [PDF]
 -e svn+http://myrepo/svn/MyApp#egg=MyApp

@@ -70,8 +70,20 @@ module CuttingEdge
     end
 
     get '/' do
-      @repos = CuttingEdge::App.repositories.select {|_, repo| !repo.hidden?}
+      hidden_repos, @public_repos = CuttingEdge::App.repositories.partition{|_, repo| repo.hidden?}.map(&:to_h)
+      @hidden_repos = !!hidden_repos
+      $stderr.puts "there are hidden repos? #{@hidden_repos}"
       erb :index
+    end
+    
+    post '/' do
+      $stderr.puts "post route hit"
+      if defined?(::CuttingEdge::SECRET_TOKEN) && params[:token] == ::CuttingEdge::SECRET_TOKEN
+        $stderr.puts "token accepted"
+      else
+        $stderr.puts "token rejected"
+      end
+         
     end
 
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|

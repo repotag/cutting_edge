@@ -5,6 +5,7 @@ github:
   repotag:
     cutting_edge:
       language: ruby
+      hide: true
   gollum:
     gollum:
       language: ruby

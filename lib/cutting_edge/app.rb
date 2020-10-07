@@ -104,6 +104,7 @@ module CuttingEdge
       validate_repo_token(params[:token]) if @repo.hidden?
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
+      @svg = "#{@svg}?token=#{@repo.hidden_token}" if @repo.hidden?
       @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
       @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
       @specs = @store[@repo.identifier]

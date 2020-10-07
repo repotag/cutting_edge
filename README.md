@@ -90,7 +90,7 @@ module CuttingEdge
 end
 ```
 
-Our sample [config.rb](config.rb) contains (within its comments) some examples of constants that you may configure. Here are some descriptions of what the less obvious ones achieve:
+The sample [config.rb](config.rb) contains (within its comments) some examples of constants that you may wish to configure. Here are some descriptions of what the less obvious ones achieve:
 
 * `SECRET_TOKEN`: set a global secret token for administrative purposes. This token is used to configure [hooks](#Refreshing dependency-status-through-git-hooks), and to list [hidden projects](#Hide-Repositories).
 
@@ -159,7 +159,7 @@ This approach is especially useful on Heroku, where you can use [Heroku config v
 
 ### Hide Repositories
 
-You may want the name and dependency monitoring information for private repositories (see above) not to be visible on the internet. To achieve this, you can use the `hide:` key in your `projects.yml`:
+You may want the name and dependency monitoring information for private repositories (see above) not to be visible on the internet. To achieve this, you can use `hide: token` in `projects.yml`:
 
 ```yaml
 github:

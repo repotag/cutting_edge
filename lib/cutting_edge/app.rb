@@ -74,8 +74,8 @@ module CuttingEdge
       @repos = public_repos
       erb :index
     end
-    
-    post '/' do
+
+    post '/hidden_repos' do
       payload = JSON.parse(request.body.read)
       if defined?(::CuttingEdge::SECRET_TOKEN) && payload['token'] == ::CuttingEdge::SECRET_TOKEN
         @repos = CuttingEdge::App.repositories.select{|_, repo| repo.hidden?}

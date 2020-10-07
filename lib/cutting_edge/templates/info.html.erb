@@ -10,8 +10,6 @@
 
   <link rel="stylesheet" href="/stylesheets/primer.css">
 
-
-
 </head>
 
 <body>
@@ -24,7 +22,7 @@
 		<br/>
 
 	  <div class="pagehead">
-			<h1 class="text-gray"><a href="<%= @project_url %>" class="link-gray"><%= @name %></a> (<%= @language %>)</h1>
+			<h1 class="text-gray"><a href="<%= @project_url %>" class="link-gray"><%= @name %></a> (<image height="24" src="<%= "/images/languages/#{@language}.svg" %>"></image> <%= @language %>)</h1>
 		</div>
 						
 		<div class="TableObject">

@@ -1,0 +1,9 @@
+<div class="Box">
+	<% @repos.each do |repo, info| %>
+
+		<div class="Box-row Box-row--hover-gray d-flex flex-items-center" role="row">
+			<div class="flex-auto overflow-hidden"><a href="<%= @repos[repo].url_for_project %>"><%= repo.gsub('/', '<span class="path-divider"> / </span>') %></a></div>
+			<div><a href="<%= "#{url(repo)}/info" %>"><svg height="20" width="200"><image xlink:href="<%= "#{url(repo)}/svg" %>" /></svg></a></div>
+		</div>
+	<% end %>
+</div>

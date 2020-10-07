@@ -62,7 +62,6 @@ module CuttingEdge
     set :views, ::File.join(::File.dirname(__FILE__), 'templates')
     Tilt.register Tilt::ERBTemplate, 'html.erb'
     set :public_folder, ::File.join(::File.dirname(__FILE__), 'public')
-
     logger filename: "#{settings.environment}.log", level: :trace
 
     before do
@@ -70,12 +69,27 @@ module CuttingEdge
     end
 
     get '/' do
-      @repos = CuttingEdge::App.repositories.select {|_, repo| !repo.hidden?}
+      hidden_repos, public_repos = CuttingEdge::App.repositories.partition{|_, repo| repo.hidden?}.map(&:to_h)
+      @hidden_repos_exist = !hidden_repos.empty?
+      @repos = public_repos
       erb :index
+    end
+
+    post '/hidden_repos' do
+      payload = JSON.parse(request.body.read)
+      if defined?(::CuttingEdge::SECRET_TOKEN) && payload['token'] == ::CuttingEdge::SECRET_TOKEN
+        @repos = CuttingEdge::App.repositories.select{|_, repo| repo.hidden?}
+        partial = Tilt::ERBTemplate.new(::File.join(CuttingEdge::App.views, '_overview.html.erb'))
+        {partial: partial.render(self)}.to_json
+      else
+        status 401
+      end
+         
     end
 
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
+      validate_token(params[:token]) if @repo.hidden?
       content_type :json
       data = @store[@repo.identifier]
       if data
@@ -87,6 +101,7 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
       repo_defined?(source, org, name)
+      validate_token(params[:token]) if @repo.hidden?
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
       @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
@@ -99,13 +114,14 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
       repo_defined?(source, org, name)
+      validate_token(params[:token]) if @repo.hidden?
       content_type 'image/svg+xml'
       @store["svg-#{@repo.identifier}"]
     end
 
     post %r{/(.+)/(.+)/(.+)/refresh} do |source, org, name|
       repo_defined?(source, org, name)
-      if defined?(::CuttingEdge::SECRET_TOKEN) && params[:token] == ::CuttingEdge::SECRET_TOKEN
+      if valid_token?(params[:token])
         worker_fetch(@repo)
         status 200
       else
@@ -118,7 +134,15 @@ module CuttingEdge
     def not_found
       halt 404, '404 Not Found'
     end
-
+    
+    def valid_token?(token)
+      defined?(::CuttingEdge::SECRET_TOKEN) && token == ::CuttingEdge::SECRET_TOKEN
+    end
+    
+    def validate_token(token)
+      not_found unless valid_token?(token)
+    end
+    
     def repo_defined?(source, org, name)
       not_found unless @repo = settings.repositories["#{source}/#{org}/#{name}"]
     end

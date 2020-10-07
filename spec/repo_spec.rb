@@ -2,7 +2,10 @@ describe CuttingEdge::Repository do
   
   it 'is capable of being hidden' do
     expect(CuttingEdge::Repository.new(org: 'org', name: 'name').hidden?).to be false
-    expect(CuttingEdge::Repository.new(org: 'org', name: 'name', hide: true).hidden?).to be true
+    hide_token = 'mytoken'
+    repo_with_hide = CuttingEdge::Repository.new(org: 'org', name: 'name', hide: hide_token)
+    expect(repo_with_hide.hidden?).to be true
+    expect(repo_with_hide.hidden_token).to eq hide_token
   end
   
   it 'has a headers method' do

@@ -77,7 +77,7 @@ module CuttingEdge
 
     post '/hidden_repos' do
       payload = JSON.parse(request.body.read)
-      if defined?(::CuttingEdge::SECRET_TOKEN) && payload['token'] == ::CuttingEdge::SECRET_TOKEN
+      if valid_token?(payload['token'])
         @repos = CuttingEdge::App.repositories.select{|_, repo| repo.hidden?}
         partial = Tilt::ERBTemplate.new(::File.join(CuttingEdge::App.views, '_overview.html.erb'))
         {partial: partial.render(self)}.to_json
@@ -89,7 +89,7 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info/json} do |source, org, name|
       repo_defined?(source, org, name)
-      validate_token(params[:token]) if @repo.hidden?
+      validate_repo_token(params[:token]) if @repo.hidden?
       content_type :json
       data = @store[@repo.identifier]
       if data
@@ -101,7 +101,7 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/info} do |source, org, name|
       repo_defined?(source, org, name)
-      validate_token(params[:token]) if @repo.hidden?
+      validate_repo_token(params[:token]) if @repo.hidden?
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
       @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{url("/#{source}/#{org}/#{name}/info")})"
@@ -114,7 +114,7 @@ module CuttingEdge
 
     get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
       repo_defined?(source, org, name)
-      validate_token(params[:token]) if @repo.hidden?
+      validate_repo_token(params[:token]) if @repo.hidden?
       content_type 'image/svg+xml'
       @store["svg-#{@repo.identifier}"]
     end
@@ -139,8 +139,8 @@ module CuttingEdge
       defined?(::CuttingEdge::SECRET_TOKEN) && token == ::CuttingEdge::SECRET_TOKEN
     end
     
-    def validate_token(token)
-      not_found unless valid_token?(token)
+    def validate_repo_token(token)
+      not_found unless token == @repo.hidden_token
     end
     
     def repo_defined?(source, org, name)

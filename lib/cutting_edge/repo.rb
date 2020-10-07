@@ -88,7 +88,7 @@ module CuttingEdge
       end
     end
 
-    def initialize(org:, name:, lang: nil, locations: nil, branch: nil, email: nil, auth_token: nil, hide: false)
+    def initialize(org:, name:, lang: nil, locations: nil, branch: nil, email: nil, auth_token: nil, hide: nil)
       @org     = org
       @name    = name
       @auth_token = auth_token
@@ -103,8 +103,12 @@ module CuttingEdge
       @dependency_types = DEPENDENCY_TYPES
     end
     
-    def hidden?
+    def hidden_token
       @hidden
+    end
+    
+    def hidden?
+      !!@hidden
     end
 
     def source

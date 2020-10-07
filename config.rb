@@ -14,6 +14,8 @@
 #     See lib/cutting_edge/templates/mail.html.erb for the default template, and the available variables.
 # EOF
 # 
+#   SECRET_TOKEN = 'mysecrettoken' # Global administrative secret
+# 
 #   LAST_VERSION_TIMEOUT = 5 # Number of seconds after which to fail when trying to determine the latest version for a dependency.
 # 
 #   BADGE_COLORS = {

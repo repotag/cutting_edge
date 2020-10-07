@@ -15,11 +15,11 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Ruby
   * Python
   * Rust
-  * [more can be added]()
+  * [add more!]()
 * Supports the following platforms:
   * GitHub
-  * Gitlab (both gitlab.com and self-hosted instances)
-  * Gitea (self-hosted)
+  * Gitlab (both gitlab.com and [self-hosted instances](#Adding-self-hosted-repository-servers))
+  * Gitea ([self-hosted](#Adding-self-hosted-repository-servers))
   * Both public and [private repositories](#Authorization-and-private-repositories)
 
 **View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**.
@@ -82,9 +82,21 @@ Explain language, locations key.
 
 ### config.rb
 
+To configure CuttingEdge specific settings in `config.rb`, you can run `cutting_edge` with the `--config` switch (you can also specify an alternative location for the config file). Always make sure you are defining your settings from within the `CuttingEdge` module. For instance:
+
+```ruby
+module CuttingEdge
+  REFRESH_SCHEDULE = '2h'
+end
+```
+
+The sample [config.rb](config.rb) contains (within its comments) some examples of constants that you may wish to configure. Here are some descriptions of what the less obvious ones achieve:
+
+* `SECRET_TOKEN`: set a global secret token for administrative purposes. This token is used to configure [hooks](#Refreshing dependency-status-through-git-hooks), and to list [hidden projects](#Hide-Repositories).
+
 ### Email Notifications
 
-### Defining your own git repository server
+### Adding self-hosted repository servers
 
 You can monitor projects on your own, self-hosted Gitlab or Gitea instances. To do so, you need to tell CuttingEdge about your server by editing `config.rb` as follows:
 
@@ -129,7 +141,7 @@ github:
 For info on generating API tokens, see:
 
 * [GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
-* [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+* [Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 * [Gitea](https://docs.gitea.io/en-us/api-usage/)
 
 If you don't want to expose your API token in `project.yml` (**which you shouldn't** when it is publicly accessible on the internet), you can instead define your project repository programatically in `config.rb`. This will allow you to set secrets (auth_token, but if desired also name and org of the repository) by (for instance) utilising environment variables:
@@ -138,16 +150,42 @@ If you don't want to expose your API token in `project.yml` (**which you shouldn
 module CuttingEdge
     require './lib/cutting_edge/repo.rb'
     REPOSITORIES = {
-      "gitlab/#{ENV['SECRET_REPO1_ORG']}/#{ENV['SECRET_REPO1_NAME']}" => GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_TOKEN'], hide: true)
+      "gitlab/#{ENV['SECRET_REPO1_ORG']}/#{ENV['SECRET_REPO1_NAME']}" => GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_AUTH_TOKEN'], hide: ENV['SECRET_REPO1_HIDE_TOKEN'])
     }
 end
 ```
 
-Setting the `hide` key to true will ensure your private repo is not listed in the web frontend, unless you enter your CuttingEdge secret token on the landing page.
-
 This approach is especially useful on Heroku, where you can use [Heroku config variables](https://devcenter.heroku.com/articles/config-vars).
 
-# Refreshing dependency status through git hooks
+### Hide Repositories
+
+You may want the name and dependency monitoring information for private repositories (see above) not to be visible on the internet. To achieve this, you can use `hide: token` in `projects.yml`:
+
+```yaml
+github:
+   secret-org:
+     secret-repo:
+       auth_token: 'mysecrettoken'
+       hide: 'myhiddenrepo'
+```
+
+...or again, you can do so in `config.rb` following the [method explained above](#Authorization-and-private-repositories):
+
+```ruby
+GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_AUTH_TOKEN'], hide: ENV['SECRET_REPO1_HIDE_TOKEN'])
+end
+```
+
+Setting the `hide` key to a token of your choice will ensure that:
+
+1. your hidden repo is not listed in the web frontend.
+  * to list all hidden repositories, you can enter your `CuttingEdge::SECRET_TOKEN` after clicking the "List hidden repositories" on the landing page.
+  * **NB: this is your global administrator token not the particular token used to hide a particular project.** 
+2. the `/info` route and SVG image for your hidden repo are not accessible without the repo-specific token you have set via `hide:`
+
+When you go to the `/info` route for your hidden repo (by first entering your administrator token, then clicking on the SVG for the project), you can click the "Embed" button and thereby acquire a link to the SVG dependency status image that contains the `hide:` token. You can thus use this link on a private repository, without giving collaborators on that project access to information about your other hidden repositories!
+
+### Refreshing dependency status through git hooks
 
 CuttingEdge by default checks whether the status of your dependencies has changed once every hour. However, if you wish, you can also setup hooks so that dependency status is checked (for instance) whenever you make a commit to your project.
 

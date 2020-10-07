@@ -180,7 +180,7 @@ Setting the `hide` key to a token of your choice will ensure that:
 
 1. your hidden repo is not listed in the web frontend.
   * to list all hidden repositories, you can enter your `CuttingEdge::SECRET_TOKEN` after clicking the "List hidden repositories" on the landing page.
-  * **NB: this is your global administrator token not the particular token used to hide a particular project.** 
+  * **NB: this is your [global administrator token](#config.rb), not the particular token used to hide a particular project.** 
 2. the `/info` route and SVG image for your hidden repo are not accessible without the repo-specific token you have set via `hide:`
 
 When you go to the `/info` route for your hidden repo (by first entering your administrator token, then clicking on the SVG for the project), you can click the "Embed" button and thereby acquire a link to the SVG dependency status image that contains the `hide:` token. You can thus use this link on a private repository, without giving collaborators on that project access to information about your other hidden repositories!

@@ -53,6 +53,7 @@ describe CuttingEdge::App do
   
   context 'hidden repos' do
     let(:project) { 'gitlab/gitlab-org/gitlab-foss' }
+    let(:repo) { CuttingEdge::App.repositories[project] }
     
     it 'does not list hidden repos on the landing page' do
       response = get('/')
@@ -62,6 +63,7 @@ describe CuttingEdge::App do
     
     before {
       ::CuttingEdge::SECRET_TOKEN = 'secret'
+      add_to_store(project, {'test' => true})
     }
     after {
       CuttingEdge.send(:remove_const, :SECRET_TOKEN)
@@ -74,6 +76,16 @@ describe CuttingEdge::App do
       expect(JSON.parse(response.body)['partial']).to include "gitlab/gitlab-org/gitlab-foss"
     end
     
+    it 'only gives access to repo information with the repo hidden token' do
+      ['/info', '/info/json', '/svg'].each do |route|
+        url = File.join('/', project, route)
+        unauthorized_response = get(url)
+        expect(unauthorized_response.status).to eq 404
+        authorized_response = get(url, token: repo.hidden_token)
+        expect(authorized_response.status).to eq 200
+      end
+    end
+    
   end
   
   context 'refreshing' do
@@ -84,6 +96,7 @@ describe CuttingEdge::App do
     after {
       CuttingEdge.send(:remove_const, :SECRET_TOKEN)
     }
+    
     it 'fails with wrong token' do
       response = post "/#{project}/refresh", :token => 'fail'
       expect(response.status).to eq 401

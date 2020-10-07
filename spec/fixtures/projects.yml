@@ -24,4 +24,4 @@ gitlab:
       locations: [Gemfile]
   gitlab-org:
     gitlab-foss:
-      hide: true
+      hide: mysecret

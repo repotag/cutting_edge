@@ -116,6 +116,7 @@ module CuttingEdge
     get %r{/(.+)/(.+)/(.+)/svg} do |source, org, name|
       repo_defined?(source, org, name)
       validate_repo_token(params[:token]) if @repo.hidden?
+      cache_control no_cache: true
       content_type 'image/svg+xml'
       @store["svg-#{@repo.identifier}"]
     end

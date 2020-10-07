@@ -49,6 +49,11 @@ describe CuttingEdge::App do
       # the store contains nothing for gollum-lib
       expect(response.status).to eq 500
     end
+    
+    it 'svgs have cache-control: no-cache' do
+      response = get("/#{project}/svg")
+      expect(response.headers['Cache-Control']).to eq 'no-cache'
+    end
   end
   
   context 'hidden repos' do

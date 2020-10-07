@@ -68,7 +68,7 @@ describe CuttingEdge::App do
     }
     
     it 'returns a JSON encoded HTML partial if the token is correct' do
-      response = post('/', "{\"token\":\"secret\"}")
+      response = post('/hidden_repos', "{\"token\":\"secret\"}")
       expect(response.body).to include('gitlab-foss')
       expect(JSON.parse(response.body)['partial']).to include "<div class=\"Box\">"
       expect(JSON.parse(response.body)['partial']).to include "gitlab/gitlab-org/gitlab-foss"

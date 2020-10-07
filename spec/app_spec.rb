@@ -59,6 +59,21 @@ describe CuttingEdge::App do
       expect(response.body).to include('team-chess-ruby')
       expect(response.body).not_to include('gitlab-foss')
     end
+    
+    before {
+      ::CuttingEdge::SECRET_TOKEN = 'secret'
+    }
+    after {
+      CuttingEdge.send(:remove_const, :SECRET_TOKEN)
+    }
+    
+    it 'returns a JSON encoded HTML partial if the token is correct' do
+      response = post('/', "{\"token\":\"secret\"}")
+      expect(response.body).to include('gitlab-foss')
+      expect(JSON.parse(response.body)['partial']).to include "<div class=\"Box\">"
+      expect(JSON.parse(response.body)['partial']).to include "gitlab/gitlab-org/gitlab-foss"
+    end
+    
   end
   
   context 'refreshing' do
@@ -75,7 +90,7 @@ describe CuttingEdge::App do
     end
     it 'succeeds with right token' do
       expect(DependencyWorker).to receive(:perform_async).exactly(:once)
-      response = post "/#{project}/refresh", :token => 'secret'
+      response = post "/#{project}/refresh", token: 'secret'
       expect(response.status).to eq 200
     end
   end

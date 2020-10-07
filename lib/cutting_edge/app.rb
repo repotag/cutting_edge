@@ -62,7 +62,6 @@ module CuttingEdge
     set :views, ::File.join(::File.dirname(__FILE__), 'templates')
     Tilt.register Tilt::ERBTemplate, 'html.erb'
     set :public_folder, ::File.join(::File.dirname(__FILE__), 'public')
-
     logger filename: "#{settings.environment}.log", level: :trace
 
     before do
@@ -70,18 +69,20 @@ module CuttingEdge
     end
 
     get '/' do
-      hidden_repos, @public_repos = CuttingEdge::App.repositories.partition{|_, repo| repo.hidden?}.map(&:to_h)
-      @hidden_repos = !!hidden_repos
-      $stderr.puts "there are hidden repos? #{@hidden_repos}"
+      hidden_repos, public_repos = CuttingEdge::App.repositories.partition{|_, repo| repo.hidden?}.map(&:to_h)
+      @hidden_repos_exist = !hidden_repos.empty?
+      @repos = public_repos
       erb :index
     end
     
     post '/' do
-      $stderr.puts "post route hit"
-      if defined?(::CuttingEdge::SECRET_TOKEN) && params[:token] == ::CuttingEdge::SECRET_TOKEN
-        $stderr.puts "token accepted"
+      payload = JSON.parse(request.body.read)
+      if defined?(::CuttingEdge::SECRET_TOKEN) && payload['token'] == ::CuttingEdge::SECRET_TOKEN
+        @repos = CuttingEdge::App.repositories.select{|_, repo| repo.hidden?}
+        partial = Tilt::ERBTemplate.new(::File.join(CuttingEdge::App.views, '_overview.html.erb'))
+        {partial: partial.render(self)}.to_json
       else
-        $stderr.puts "token rejected"
+        status 401
       end
          
     end

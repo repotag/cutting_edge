@@ -66,7 +66,9 @@ Steps:
 2. Edit `projects.yml` and commit it to the repo
 3. `heroku create my-cuttingedge`
 4. `git push heroku master`
-5. *Optional, if you want to receive [email notifications](#Email-Notifications)*: `heroku addons:create mailgun:starter`
+5. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
+  * `heroku addons:create mailgun:starter`
+  * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
 
 You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
 

@@ -286,4 +286,4 @@ See [here](CONTRIBUTING.md).
 
 ## License
 
-This work is licensed under the terms of the [GNU GPLv3.0](LICENSE).
+This work is licensed under the terms of the [GNU Affero GPLv3.0](LICENSE). Copyright Dawa Ometto and Bart Kamphorst, 2020.

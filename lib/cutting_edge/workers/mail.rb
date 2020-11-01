@@ -17,7 +17,7 @@ class MailWorker < GenericWorker
     end
 
     Mail.deliver do
-      from     CuttingEdge::MAIL_FROM
+      from     "CuttingEdge <#{CuttingEdge::MAIL_FROM}>"
       to       to_addr
       subject  "Dependency Status Changed For #{identifier}"
       

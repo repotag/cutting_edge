@@ -2,6 +2,7 @@
 # All the settings below are purely optional: they all have sane defaults.  
 
 # Configure mail server settings (outside the CuttingEdge module)
+require 'mail'
 Mail.defaults do
   delivery_method :smtp, address: 'localhost', port: 25
 end

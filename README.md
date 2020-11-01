@@ -15,7 +15,7 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Ruby
   * Python
   * Rust
-  * [add more!]()
+  * [...add more!](https://github.com/repotag/cutting_edge/wiki/Languages)
 * Supports the following platforms:
   * GitHub
   * Gitlab (both gitlab.com and [self-hosted instances](#Adding-self-hosted-repository-servers))
@@ -29,9 +29,10 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
 CuttingEdge is lightweight and easy to deploy: 
 
 * No database required
+  * you can optionally use [data stores like Redis](#Using-Redis-and-other-data-stores)
 * Simple configuration through a `projects.yml` file
 * Requires relatively few resources (~120MB RAM), so...
-* It can even run on Heroku's free plan!
+* It can even run on [Heroku](#Deploying-on-Heroku)'s free plan!
 
 ## Installation
 
@@ -55,14 +56,21 @@ Before running, define your repositories in [projects.yml](#projects-yml). You m
 
 ### Deploying on Heroku
 
-CuttingEdge runs out of the box on Heroku, and is lightweight enough to function on the Heroku free plan. We recommend you:
+CuttingEdge runs out of the box on Heroku, and is lightweight enough to function on the Heroku free plan. This repository already contains the `Procfile` needed for deployment.
 
-1. Clone/fork [this](ADD URL TO HEROKU EXAMPLE) repository, as it already contains some `config.rb` settings relevant to Heroku
+**Note: on Heroku, CuttingEdge uses `heroku.config.rb` instead of `config.rb`**.
+
+Steps:
+
+1. Clone/fork this repository, as it already contains some settings (in `heroku.config.rb`) relevant to Heroku
 2. Edit `projects.yml` and commit it to the repo
 3. `heroku create my-cuttingedge`
 4. `git push heroku master`
+5. *Optional, if you want to receive [email notifications](#Email-Notifications)*: `heroku addons:create mailgun:starter`
 
-You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `config.rb`.
+You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
+
+Note that Heroku switches off apps running on their free plan when they idle, so you may want to look at [this](https://medium.com/better-programming/keeping-my-heroku-app-alive-b19f3a8c3a82).
 
 ## Usage
 
@@ -78,11 +86,34 @@ An instance on Heroku will be accessible through:
 
 ### projects.yml
 
-Explain language, locations key.
+`projects.yml` is the file in which you define which repositories you want CuttingEdge to monitor. Here's an example:
+
+```yaml
+github:
+  my_org:
+    my_project:
+      language: ruby
+```
+
+This will make CuttingEdge monitor the GitHub project `my_org/my_project`. You can add multiple repositories under the `github:` key, and also use the `gitlab:` key for repositories on gitlab.com out of the box. If you [add self-hosted providers](#Adding-self-hosted-repository-servers), you'll be able to define repositories using, for instance, `my_gitea:`.
+
+ The `language:` key can currently be set to `ruby` (default), `rust`, or `python`. Further supported keys:
+
+* `auth_token`: see [here](#Authorization-and-private-repositories)
+* `hide`: see [here](#Hide-repositories)
+* `locations`: use to change the default path to dependency definition files. For instance, for a Ruby project, CuttingEdge will by default try to monitor `Gemfile` and `my_project.gemspec`. You can override this with `language: [Gemfile, alternative/file.gemspec]`
+* `branch`: use a different branch than the default `master`
+* `email`:
+  * disable email notifications for a single project by setting this to `false`
+  * ...or use a non-default address delivery address for notifications about this project by setting it to e.g. `myproject@mydependencymonitoring.com`
+
+Note: by default CuttingEdge will use `projects.yml` in the working directory. You may optionally specify a different path by running `cutting_edge path/to/my_projects.yml`.
+
+Instead of `projects.yml`, you can also [define projects in `config.rb`](#Defining-repositories-in-configrb).
 
 ### config.rb
 
-To configure CuttingEdge specific settings in `config.rb`, you can run `cutting_edge` with the `--config` switch (you can also specify an alternative location for the config file). Always make sure you are defining your settings from within the `CuttingEdge` module. For instance:
+To configure CuttingEdge specific settings in `config.rb`, you can run `cutting_edge` with the `--config` switch (you can optionally specify an alternative location for the config file). Always make sure you are defining your settings from within the `CuttingEdge` module. For instance:
 
 ```ruby
 module CuttingEdge
@@ -90,15 +121,39 @@ module CuttingEdge
 end
 ```
 
-The sample [config.rb](config.rb) contains (within its comments) some examples of constants that you may wish to configure. Here are some descriptions of what the less obvious ones achieve:
+The sample [config.rb](config.rb) contains some examples of constants that you may wish to configure. Here are some descriptions of what the less obvious ones achieve:
 
-* `SECRET_TOKEN`: set a global secret token for administrative purposes. This token is used to configure [hooks](#Refreshing dependency-status-through-git-hooks), and to list [hidden projects](#Hide-Repositories).
+* `SECRET_TOKEN`: set a global secret token for administrative purposes. This token is used to configure [hooks](#Refreshing-dependency-status-through-git-hooks), and to list [hidden projects](#Hide-Repositories).
+* `SERVER_URL`: the link to the app that should be displayed, for instance in emails. Defaults to `"http://#{SERVER_HOST}"`
+* `MAIL_TEMPLATE`: override the [ERB](https://www.stuartellis.name/articles/erb/) template used to render [emails](#Email-Notifications). See [mail.html.erb](lib/cutting_edge/templates/mail.html.erb) for an example on which variables you can use within the template.
 
 ### Email Notifications
 
+CuttingEdge can send email notifications whenever a change in the dependency status of a monitored project is detected. This is disabled by default. Enable it in `config.rb`:
+
+```ruby
+module CuttingEdge
+  MAIL_TO = 'mydeps@mymail.com'  # Default address to send email to. If set to false (=default!), don't send any emails except for repositories that have their 'email:' attribute set in projects.yml
+  MAIL_FROM = "cutting_edge@my_server.com" # From Address used for sending emails.
+end
+```
+
+By default, the app wil try to use an SMTP server on `localhost:25`. Change these settings in your `config.rb` by calling `Mail.defaults`:
+
+```ruby
+# This should be outside the module CuttingEdge
+Mail.defaults do
+  delivery_method :smtp, address: "localhost", port: 1025
+end
+```
+
+See [the mail gem](https://github.com/mikel/mail#sending-an-email) for more information.
+
+You can switch off email notifications for a single project by setting its `email:` key to `false` in [projects.yml](#projects-yml). Alternatively, you can set the `email:` key for a single project to a different address than the default `MAIL_TO`.
+
 ### Adding self-hosted repository servers
 
-You can monitor projects on your own, self-hosted Gitlab or Gitea instances. To do so, you need to tell CuttingEdge about your server by editing `config.rb` as follows:
+You can monitor projects on your own self-hosted Gitlab or Gitea instances. To do so, you need to tell CuttingEdge about your server by editing `config.rb` as follows:
 
 ```ruby
 module CuttingEdge
@@ -111,10 +166,6 @@ end
 This will allow you to use the `mygitlab:` and `mygitea:` keys in `projects.yml`, for instance like so:
 
 ```yaml
-github:
-   repotag:
-     cutting_edge:
-       lang: ruby
 mygitlab:
   myorg:
     project-name:
@@ -144,7 +195,9 @@ For info on generating API tokens, see:
 * [Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 * [Gitea](https://docs.gitea.io/en-us/api-usage/)
 
-If you don't want to expose your API token in `project.yml` (**which you shouldn't** when it is publicly accessible on the internet), you can instead define your project repository programatically in `config.rb`. This will allow you to set secrets (auth_token, but if desired also name and org of the repository) by (for instance) utilising environment variables:
+### Defining repositories in config.rb
+
+If you don't want to expose information about a project in (**such as an [API token](#Authorization-and-private-repositories)!**) `projects.yml` (which may be publically accessible on the internet), you can instead define your project repository programatically in `config.rb`. This will allow you to define repositories with secret parameters by (for instance) utilising environment variables:
 
 ```ruby
 module CuttingEdge
@@ -169,7 +222,7 @@ github:
        hide: 'myhiddenrepo'
 ```
 
-...or again, you can do so in `config.rb` following the [method explained above](#Authorization-and-private-repositories):
+...or again, you can do so in `config.rb` following the [method explained above](#Defining-repositories-in-configrb):
 
 ```ruby
 GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_AUTH_TOKEN'], hide: ENV['SECRET_REPO1_HIDE_TOKEN'])
@@ -211,7 +264,25 @@ You can test the route like this:
 curl -d 'token=mysecrettoken' http://mycuttingedge.com/github/org/myproject/refresh
 ```
 
+## Using Redis and other data stores
+
+CuttingEdge does not require persistence, as the data it uses (which dependencies does a project have, and are they up to daate?) is refreshed periodically anyway. By default, this information is stored in memory. However, if you would like to store data in a different kind of data store (for instance Redis) that can be trivially accomplished. This may further decrease the amount of RAM CuttingEdge requires, and possibly improve performance.
+
+CuttingEdge uses [Moneta](https://github.com/moneta-rb/moneta) as an abstraction layer for its data store, so to change the data store can just do the following in `config.rb`:
+
+```ruby
+module CuttingEdge
+  STORE = Moneta.new(:Redis)
+end
+```
+
+See the [Moneta](https://github.com/moneta-rb/moneta) instructions.
+
+Note that Heroku offers a free [Redis Add-on](https://elements.heroku.com/addons/heroku-redis).
+
 ## Contributing
+
+See [here](CONTRIBUTING.md).
 
 ## License
 

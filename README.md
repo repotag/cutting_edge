@@ -70,6 +70,7 @@ Steps:
 1. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
   * `heroku addons:create mailgun:starter`
   * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
+  * If you are on the free plan: [add all email addresses you would like to use as Authorized Recipients in Mailgun](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients)
 
 You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
 

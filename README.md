@@ -70,7 +70,7 @@ Steps:
 1. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
   * `heroku addons:create mailgun:starter`
   * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
-  * If you are on the free plan: [add all email addresses you would like to use as Authorized Recipients in Mailgun](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients)
+  * If you are on the free plan: [add your email addresses as Authorized Recipients](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients) in [Mailgun](https://app.mailgun.com/) (login via Heroku)
 
 You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
 
@@ -270,7 +270,7 @@ curl -d 'token=mysecrettoken' http://mycuttingedge.com/github/org/myproject/refr
 
 ## Using Redis and other data stores
 
-CuttingEdge does not require persistence, as the data it uses (which dependencies does a project have, and are they up to daate?) is refreshed periodically anyway. By default, this information is stored in memory. However, if you would like to store data in a different kind of data store (for instance Redis) that can be trivially accomplished. This may further decrease the amount of RAM CuttingEdge requires, and possibly improve performance.
+CuttingEdge does not require persistence, as the data it uses (which dependencies does a project have, and are they up to date?) is refreshed periodically anyway. By default, this information is stored in memory. However, if you would like to store data in a different kind of data store (for instance Redis) that can be trivially accomplished. This may further decrease the amount of RAM CuttingEdge requires, and possibly improve performance.
 
 CuttingEdge uses [Moneta](https://github.com/moneta-rb/moneta) as an abstraction layer for its data store, so to change the data store can just do the following in `config.rb`:
 

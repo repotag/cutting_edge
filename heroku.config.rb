@@ -10,6 +10,9 @@ module CuttingEdge
   # https://github.com/repotag/cutting_edge/blob/master/README.md#Defining-repositories-in-configrb
 end
 
+# Needed to write to Heroku logs.
+::SemanticLogger.add_appender(io: $stderr)
+
 # Configure mail server settings
 require 'mail'
 Mail.defaults do

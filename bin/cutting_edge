@@ -3,6 +3,7 @@
 require 'yaml'
 require 'rufus-scheduler'
 require 'optparse'
+require 'semantic_logger'
 
 module CuttingEdge
   REFRESH_SCHEDULE = '1h'

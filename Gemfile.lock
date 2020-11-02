@@ -1,9 +1,10 @@
 PATH
   remote: .
   specs:
-    cutting_edge (0.0.1)
+    cutting_edge (0.1)
       gemnasium-parser (~> 0.1.9)
       http (~> 4.3)
+      mail (~> 2.7)
       moneta (~> 1.2)
       rufus-scheduler (~> 3.6)
       sinatra (~> 2.0)
@@ -120,7 +121,6 @@ DEPENDENCIES
   coveralls (~> 0.8.23)
   cutting_edge!
   hashdiff
-  mail
   rack-test
   redis
   rspec (~> 3.9)

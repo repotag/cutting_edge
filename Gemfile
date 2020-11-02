@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'redis', require: false
-gem 'mail'
 
 gem 'hashdiff'
 

@@ -105,9 +105,9 @@ module CuttingEdge
       @name = name
       @svg = url("/#{source}/#{org}/#{name}/svg")
       @svg = "#{@svg}?token=#{@repo.hidden_token}" if @repo.hidden?
-      @info = url("/#{source}/#{org}/#{name}/info")
-      @info = "#{@info}?token=#{@repo.hidden_token}" if @repo.hidden?
-      @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{@info})"
+      info = url("/#{source}/#{org}/#{name}/info")
+      info = "#{info}?token=#{@repo.hidden_token}" if @repo.hidden?
+      @md = "[![Cutting Edge Dependency Status](#{@svg} 'Cutting Edge Dependency Status')](#{info})"
       @colors = {ok: 'green', outdated_patch: 'yellow', outdated_minor: 'orange', outdated_major: 'red', unknown: 'gray'}
       @specs = @store[@repo.identifier]
       @project_url = @repo.url_for_project

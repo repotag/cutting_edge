@@ -3,14 +3,15 @@ require 'http'
 require File.expand_path('../../versions.rb', __FILE__)
 require File.expand_path('../../langs.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)
+require 'hashdiff'
 
 class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :unknown, :no_requirement, :ok]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
-
+  
   def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
     log_info 'Running Worker!'
     @lang = get_lang(lang)
@@ -28,14 +29,75 @@ class DependencyWorker < GenericWorker
       add_to_store(identifier, dependencies) unless @nothing_changed
     ensure
       unless @nothing_changed
+      #  alt_diff(dependencies[:locations], old_dependencies[:locations])
         badge_worker(identifier)
-        mail_worker(identifier, to_addr) if to_addr
+        mail_worker(identifier, to_addr, alt_diff(old_dependencies[:locations], dependencies[:locations])) if to_addr && !old_dependencies.empty?
       end
       GC.start
     end
   end
 
   private
+  
+  def alt_diff(old, new)
+    old_merged = old.values.first.merge(*old.values[1..-1]) {|key, this_val, other_val| this_val + other_val}
+    new_merged = new.values.first.merge(*new.values[1..-1]) {|key, this_val, other_val| this_val + other_val}
+    diff = Hashdiff.diff(old_merged, new_merged)
+    additions = diff.select {|x| x.first == '+'}
+    deletions = diff.select {|x| x.first == '-'}
+    result = {}
+    
+    additions.each do |addition|
+      status = addition[1].split('[').first.to_sym
+      name = addition.last[:name]
+      if status == :ok
+        result[name] = :good_change
+        next
+      elsif [:unknown, :no_requirement].include?(status)
+        result[name] = :bad_change
+        next
+      end
+      deletion = deletions.find {|x| x.last[:name] == name}
+      if deletion
+        old_status = deletion[1].split('[').first.to_sym
+        result[name] = STATUS_TYPES.find_index(status) > STATUS_TYPES.find_index(old_status) ? :good_change : :bad_change
+      else
+        result[name] = :bad_change
+      end
+    end
+    result
+  end
+  
+  def diff_dependencies(old, new)
+    old_with_status = status_for_all_dependencies(old)
+    new_with_status = status_for_all_dependencies(new)
+    
+    new_with_status.delete_if {|k,v| old_with_status[k] == v}
+    
+    new_with_status.each do |name, status|
+      new_with_status[name] = case
+      when status == :ok
+        :good_change
+      when !old_with_status.key?(name)
+        :bad_change
+      when outdated_type?(status) && STATUS_TYPES.find_index(status) > STATUS_TYPES.find_index(old_with_status[name])
+        :good_change
+      else
+        :bad_change
+      end
+    end
+    new_with_status
+  end
+  
+  def status_for_all_dependencies(dependencies)
+    result = {}
+    dependencies.each_value do |location|
+      location.each do |status, gems|
+        result.merge! Hash[gems.collect {|gem| [gem[:name], status]}]
+      end
+    end
+    result
+  end
 
   def get_results(dependencies, dependency_types)
     results = {}

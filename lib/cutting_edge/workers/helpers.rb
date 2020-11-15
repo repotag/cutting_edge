@@ -19,8 +19,8 @@ module WorkerHelpers
     BadgeWorker.perform_async(identifier)
   end
   
-  def mail_worker(identifier, to_address)
-    MailWorker.perform_async(identifier, to_address)
+  def mail_worker(identifier, to_address, diff)
+    MailWorker.perform_async(identifier, to_address, diff)
   end
 
 end

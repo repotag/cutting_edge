@@ -7,6 +7,7 @@ describe MailWorker do
   let(:worker) { MailWorker.new }
   let(:identifier) { 'github/repotag/cutting_edge' }
   let(:test_email) { 'cutting_edge@localhost' }
+  let(:diff) { nil }
   let(:dependencies) {
     mock_dependencies('gollum')
   }
@@ -16,12 +17,12 @@ describe MailWorker do
   }
   
   it 'returns nil when to address is nil ' do  
-    expect(worker.perform(identifier, nil)).to eq nil
+    expect(worker.perform(identifier, nil, diff)).to eq nil
   end
   
   it 'sends an update mail' do
     expect(Mail::TestMailer.deliveries).to be_empty
-    worker.perform(identifier, test_email)
+    worker.perform(identifier, test_email, diff)
     expect(Mail::TestMailer.deliveries).to_not be_empty
     
     mail = Mail::TestMailer.deliveries.first

@@ -8,7 +8,7 @@ end
 
 class MailWorker < GenericWorker
   
-  def perform(identifier, to_addr)
+  def perform(identifier, to_addr, diff)
     log_info('Running Worker!')
     dependencies = get_from_store(identifier)
     unless to_addr && dependencies

@@ -9,7 +9,7 @@ class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES =  [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
+  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
   
   def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
@@ -26,12 +26,14 @@ class DependencyWorker < GenericWorker
       end
       dependencies.merge!(generate_stats(dependencies[:locations]))
       @nothing_changed = dependencies == old_dependencies
-      add_to_store(identifier, dependencies) unless @nothing_changed
+      unless @nothing_changed
+        add_to_store(identifier, dependencies)
+        add_to_store("diff-#{identifier}", diff_dependencies(old_dependencies[:locations], dependencies[:locations]))
+      end
     ensure
       unless @nothing_changed
-      #  alt_diff(dependencies[:locations], old_dependencies[:locations])
         badge_worker(identifier)
-        mail_worker(identifier, to_addr, alt_diff(old_dependencies[:locations], dependencies[:locations])) if to_addr && !old_dependencies.empty?
+        mail_worker(identifier, to_addr) if to_addr && !old_dependencies.empty?
       end
       GC.start
     end
@@ -39,57 +41,38 @@ class DependencyWorker < GenericWorker
 
   private
   
-  def alt_diff(old, new)
-    old_merged = old.values.first.merge(*old.values[1..-1]) {|key, current_val, new_val| current_val + new_val}
-    new_merged = new.values.first.merge(*new.values[1..-1]) {|key, current_val, new_val| current_val + new_val}
-    diff = Hashdiff.diff(old_merged, new_merged)
+  def diff_dependencies(old, new)
+    diff = Hashdiff.diff(old, new)
     additions = diff.select {|x| x.first == '+'}
     deletions = diff.select {|x| x.first == '-'}
     result = {}
     
     additions.each do |addition|
-      status = addition[1].split('[').first.to_sym # Hashdiff generates strings of the form "ok[1]" to indicate this is the first change to the Hash under the :ok key
+      status = parse_diff_status(addition[1])
       name = addition.last[:name]
       old_status = deletions.find {|x| x.last[:name] == name}
-      old_status = old_status[1].split('[').first.to_sym if old_status
-      result[name] = status_improved?(old_status, status) ? :good_change : :bad_change
+      old_status = parse_diff_status(old_status[1]) if old_status
+      result[name] = change_type(old_status, status)
     end
     result
   end
   
-  def diff_dependencies(old, new)
-    old_with_status = status_for_all_dependencies(old)
-    new_with_status = status_for_all_dependencies(new)
-    
-    new_with_status.delete_if {|k,v| old_with_status[k] == v}
-    
-    new_with_status.each do |name, status|
-      new_with_status[name] = status_improved?(old_with_status[name], status) ? :good_change : :bad_change
-    end
-    new_with_status
+  def parse_diff_status(str)
+    # Hashdiff generates strings of the form "gemfile.ok[1]" to indicate this is the first change to the Hash under the :ok key
+    str.split('.').last.split('[').first.to_sym
   end
   
-  def status_improved?(old_status, new_status)
+  def change_type(old_status, new_status)
     case
     when new_status == :ok
-      true
+      :good_change
     when outdated_type?(new_status) && old_status && STATUS_TYPES.find_index(new_status) > STATUS_TYPES.find_index(old_status)
-      true
+      :good_change
     else
-      false
+      :bad_change
     end
   end
   
-  def status_for_all_dependencies(dependencies)
-    result = {}
-    dependencies.each_value do |location|
-      location.each do |status, gems|
-        result.merge! Hash[gems.collect {|gem| [gem[:name], status]}]
-      end
-    end
-    result
-  end
-
   def get_results(dependencies, dependency_types)
     results = {}
     STATUS_TYPES.each {|type| results[type] = []}

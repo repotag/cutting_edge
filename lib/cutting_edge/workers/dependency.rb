@@ -9,7 +9,7 @@ class DependencyWorker < GenericWorker
   include VersionRequirementComparator
 
   # Order is significant for purposes of calculating results[:outdated]
-  STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :unknown, :no_requirement, :ok]
+  STATUS_TYPES =  [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
   
   def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
@@ -40,30 +40,19 @@ class DependencyWorker < GenericWorker
   private
   
   def alt_diff(old, new)
-    old_merged = old.values.first.merge(*old.values[1..-1]) {|key, this_val, other_val| this_val + other_val}
-    new_merged = new.values.first.merge(*new.values[1..-1]) {|key, this_val, other_val| this_val + other_val}
+    old_merged = old.values.first.merge(*old.values[1..-1]) {|key, current_val, new_val| current_val + new_val}
+    new_merged = new.values.first.merge(*new.values[1..-1]) {|key, current_val, new_val| current_val + new_val}
     diff = Hashdiff.diff(old_merged, new_merged)
     additions = diff.select {|x| x.first == '+'}
     deletions = diff.select {|x| x.first == '-'}
     result = {}
     
     additions.each do |addition|
-      status = addition[1].split('[').first.to_sym
+      status = addition[1].split('[').first.to_sym # Hashdiff generates strings of the form "ok[1]" to indicate this is the first change to the Hash under the :ok key
       name = addition.last[:name]
-      if status == :ok
-        result[name] = :good_change
-        next
-      elsif [:unknown, :no_requirement].include?(status)
-        result[name] = :bad_change
-        next
-      end
-      deletion = deletions.find {|x| x.last[:name] == name}
-      if deletion
-        old_status = deletion[1].split('[').first.to_sym
-        result[name] = STATUS_TYPES.find_index(status) > STATUS_TYPES.find_index(old_status) ? :good_change : :bad_change
-      else
-        result[name] = :bad_change
-      end
+      old_status = deletions.find {|x| x.last[:name] == name}
+      old_status = old_status[1].split('[').first.to_sym if old_status
+      result[name] = status_improved?(old_status, status) ? :good_change : :bad_change
     end
     result
   end
@@ -75,18 +64,20 @@ class DependencyWorker < GenericWorker
     new_with_status.delete_if {|k,v| old_with_status[k] == v}
     
     new_with_status.each do |name, status|
-      new_with_status[name] = case
-      when status == :ok
-        :good_change
-      when !old_with_status.key?(name)
-        :bad_change
-      when outdated_type?(status) && STATUS_TYPES.find_index(status) > STATUS_TYPES.find_index(old_with_status[name])
-        :good_change
-      else
-        :bad_change
-      end
+      new_with_status[name] = status_improved?(old_with_status[name], status) ? :good_change : :bad_change
     end
     new_with_status
+  end
+  
+  def status_improved?(old_status, new_status)
+    case
+    when new_status == :ok
+      true
+    when old_status && STATUS_TYPES.find_index(new_status) > STATUS_TYPES.find_index(old_status)
+      true
+    else
+      false
+    end
   end
   
   def status_for_all_dependencies(dependencies)

@@ -55,6 +55,7 @@ module CuttingEdge
   SERVER_URL = "http://#{SERVER_HOST}" unless defined?(SERVER_URL)
   MAIL_TO = false unless defined?(MAIL_TO) # Default address to send email to. If set to false, don't send any e-mails except for repositories that have their 'email' attribute set.
   MAIL_FROM = "cutting_edge@#{SERVER_HOST}" unless defined?(MAIL_FROM)
+  ALWAYS_MAIL = false unless defined?(ALWAYS_MAIL)
    
   class App < Sinatra::Base
     include CuttingEdgeHelpers

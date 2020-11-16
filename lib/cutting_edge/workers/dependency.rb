@@ -33,7 +33,7 @@ class DependencyWorker < GenericWorker
     ensure
       unless @nothing_changed
         badge_worker(identifier)
-        mail_worker(identifier, to_addr) if to_addr && !old_dependencies.empty?
+        mail_worker(identifier, to_addr) if to_addr && (!old_dependencies.empty? || ::CuttingEdge::ALWAYS_MAIL)
       end
       GC.start
     end

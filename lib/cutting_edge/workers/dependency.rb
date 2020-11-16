@@ -73,7 +73,7 @@ class DependencyWorker < GenericWorker
     case
     when new_status == :ok
       true
-    when old_status && STATUS_TYPES.find_index(new_status) > STATUS_TYPES.find_index(old_status)
+    when outdated_type?(new_status) && old_status && STATUS_TYPES.find_index(new_status) > STATUS_TYPES.find_index(old_status)
       true
     else
       false

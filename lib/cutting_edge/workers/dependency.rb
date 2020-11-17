@@ -17,7 +17,7 @@ class DependencyWorker < GenericWorker
     @lang = get_lang(lang)
     @provider = get_provider(identifier)
     @auth_token = auth_token
-    old_dependencies = get_from_store(identifier)
+    old_dependencies = get_from_store(identifier) || {}
     begin
       dependencies = {:locations => {}}
       locations.each do |name, url|
@@ -42,7 +42,8 @@ class DependencyWorker < GenericWorker
   private
   
   def diff_dependencies(old, new)
-    diff = Hashdiff.diff(old, new)
+    base = old ? old : new.transform_values {|_v| empty_status_hash }
+    diff = Hashdiff.diff(base, new)
     additions = diff.select {|x| x.first == '+'}
     deletions = diff.select {|x| x.first == '-'}
     result = {}
@@ -73,9 +74,14 @@ class DependencyWorker < GenericWorker
     end
   end
   
-  def get_results(dependencies, dependency_types)
+  def empty_status_hash
     results = {}
     STATUS_TYPES.each {|type| results[type] = []}
+    results
+  end
+  
+  def get_results(dependencies, dependency_types)
+    results = empty_status_hash
     if dependencies
       dependencies.select! {|dep| dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|

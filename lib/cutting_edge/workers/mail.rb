@@ -16,8 +16,11 @@ class MailWorker < GenericWorker
       return nil
     end
     
-    diff = delete_from_store("diff-#{identifier}")
-    diff.transform_values! {|v| v == :good_change ? 'green' : 'red' }
+    if diff = delete_from_store("diff-#{identifier}")
+      diff.transform_values! {|v| v == :good_change ? 'green' : 'red' }
+    else
+      diff = {}
+    end
 
     Mail.deliver do
       from     "CuttingEdge <#{CuttingEdge::MAIL_FROM}>"

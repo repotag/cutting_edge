@@ -75,9 +75,7 @@ class DependencyWorker < GenericWorker
   end
   
   def empty_status_hash
-    results = {}
-    STATUS_TYPES.each {|type| results[type] = []}
-    results
+    Hash[STATUS_TYPES.map {|status| [status, []]}]
   end
   
   def get_results(dependencies, dependency_types)

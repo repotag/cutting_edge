@@ -7,12 +7,16 @@ module WorkerHelpers
     logger.info(message) if ::CuttingEdge::App.enable_logging
   end
 
-  def add_to_store(identifier, dependencies)
-    ::CuttingEdge::App.store[identifier] = dependencies
+  def add_to_store(identifier, data)
+    ::CuttingEdge::App.store[identifier] = data
   end
 
   def get_from_store(identifier)
     ::CuttingEdge::App.store[identifier]
+  end
+  
+  def delete_from_store(identifier)
+    ::CuttingEdge::App.store.delete(identifier)
   end
   
   def badge_worker(identifier)
@@ -22,7 +26,7 @@ module WorkerHelpers
   def mail_worker(identifier, to_address)
     MailWorker.perform_async(identifier, to_address)
   end
-
+  
 end
 
 class GenericWorker

@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.executables = ['cutting_edge']
 
   s.add_dependency 'gemnasium-parser', '~> 0.1.9'
+  s.add_dependency 'hashdiff', '~> 1.0'
   s.add_dependency 'http', '~> 4.3'
   s.add_dependency 'sucker_punch', '~> 2.1'
   s.add_dependency 'sinatra', '~> 2.0'

@@ -19,7 +19,8 @@ module CuttingEdge
     Of course, you can also File.read it from a separate template file.
     See lib/cutting_edge/templates/mail.html.erb for the default template, and the available variables.
 EOF
-
+  ALWAYS_MAIL = true # Send e-mail notifications even on a first run (when no information on *changes* in dependency status is available). Default: false
+  
   SECRET_TOKEN = 'mysecrettoken' # Global administrative secret
 
   LAST_VERSION_TIMEOUT = 5 # Number of seconds after which to fail when trying to determine the latest version for a dependency.

@@ -133,7 +133,7 @@
                               <b><%= type.to_s.split('_').collect(&:capitalize).join(' ') %></b>:
                                 <ul>
                                 <% dependencies.each do |dependency| %>
-                                    <li><%= dependency[:name] %> <%= dependency[:required] %> (latest: <%= dependency[:latest] %>)</li>
+                                    <li<% if color = diff[dependency[:name]] %> style="color:<%= color %>;"<% end %>><%= dependency[:name] %> <%= dependency[:required] %> (latest: <%= dependency[:latest] %>)</li>
                                 <% end %>
                                 </ul>
                             </ul>

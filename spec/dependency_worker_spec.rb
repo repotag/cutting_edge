@@ -29,7 +29,7 @@ describe DependencyWorker do
   let(:new_dependencies) {
     mock_dependencies('gollum-updated')
   }
-  
+
   context 'http fetching files' do
     let(:response_ok) { MockResponse.new(200, 'body') }
     let(:response_not_found) { MockResponse.new(404, 'Not found') }
@@ -91,10 +91,11 @@ describe DependencyWorker do
     }
     
     context 'when the dependencies have changed' do
+      let(:dependency_diff) {  {'foobar' => :bad_change, 'gollum-lib' => :bad_change, 'kramdown-parser-gfm' => :good_change} }
     
       before(:each) {
         locations.each_key do |loc|
-          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc, true))
+          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum-updated', loc))
         end
         expect(worker).to receive(:badge_worker).with(identifier).and_return(true)
         expect(worker).to receive(:mail_worker).with(identifier, test_email).and_return(true)
@@ -102,6 +103,7 @@ describe DependencyWorker do
     
       it 'updates the store with newest dependencies' do
         expect(worker).to receive(:add_to_store).with(identifier, new_dependencies).and_return(true)
+        expect(worker).to receive(:add_to_store).with("diff-#{identifier}", dependency_diff).and_return(true)
         expect(worker.instance_variable_get(:@nothing_changed)).to be_nil
         worker.perform(identifier, lang, locations, dependency_types, test_email)
         expect(worker.instance_variable_get(:@nothing_changed)).to be false
@@ -113,7 +115,7 @@ describe DependencyWorker do
     
       before(:each) {
         locations.each_key do |loc|
-          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc, false))
+          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc))
         end
         expect(worker).not_to receive(:badge_worker)
         expect(worker).not_to receive(:mail_worker)

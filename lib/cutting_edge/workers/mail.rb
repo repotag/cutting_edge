@@ -15,6 +15,12 @@ class MailWorker < GenericWorker
       log_info("Failed to execute email job for #{identifier}: #{dependencies ? dependencies : 'No dependencies found.'} #{'No e-mail address set.' if to_addr.nil?}")
       return nil
     end
+    
+    if diff = delete_from_store("diff-#{identifier}")
+      diff.transform_values! {|v| v == :good_change ? 'green' : 'red' }
+    else
+      diff = {}
+    end
 
     Mail.deliver do
       from     "CuttingEdge <#{CuttingEdge::MAIL_FROM}>"
@@ -30,6 +36,7 @@ class MailWorker < GenericWorker
         body  ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(
           project: identifier,
           url: CuttingEdge::SERVER_URL,
+          diff: diff,
           specs: dependencies
         )
       end

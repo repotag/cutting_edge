@@ -3,6 +3,7 @@ require 'http'
 require File.expand_path('../../versions.rb', __FILE__)
 require File.expand_path('../../langs.rb', __FILE__)
 require File.expand_path('../helpers.rb', __FILE__)
+require 'hashdiff'
 
 class DependencyWorker < GenericWorker
   include VersionRequirementComparator
@@ -10,13 +11,14 @@ class DependencyWorker < GenericWorker
   # Order is significant for purposes of calculating results[:outdated]
   STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
-
+  EMPTY_STATUS_HASH = STATUS_TYPES.inject({}){|result, type| result[type] = []; result}
+  
   def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
     log_info 'Running Worker!'
     @lang = get_lang(lang)
     @provider = get_provider(identifier)
     @auth_token = auth_token
-    old_dependencies = get_from_store(identifier)
+    old_dependencies = get_from_store(identifier) || {}
     begin
       dependencies = {:locations => {}}
       locations.each do |name, url|
@@ -25,21 +27,60 @@ class DependencyWorker < GenericWorker
       end
       dependencies.merge!(generate_stats(dependencies[:locations]))
       @nothing_changed = dependencies == old_dependencies
-      add_to_store(identifier, dependencies) unless @nothing_changed
+      unless @nothing_changed
+        add_to_store(identifier, dependencies)
+        add_to_store("diff-#{identifier}", diff_dependencies(old_dependencies[:locations], dependencies[:locations]))
+      end
     ensure
       unless @nothing_changed
         badge_worker(identifier)
-        mail_worker(identifier, to_addr) if to_addr
+        mail_worker(identifier, to_addr) if to_addr && (!old_dependencies.empty? || ::CuttingEdge::ALWAYS_MAIL)
       end
       GC.start
     end
   end
 
   private
-
+  
+  def diff_dependencies(old, new)
+    base = old ? old : new.transform_values {|_v| empty_status_hash }
+    diff = Hashdiff.diff(base, new)
+    additions = diff.select {|x| x.first == '+'}
+    deletions = diff.select {|x| x.first == '-'}
+    result = {}
+    
+    additions.each do |addition|
+      status = parse_diff_status(addition[1])
+      name = addition.last[:name]
+      old_status = deletions.find {|x| x.last[:name] == name}
+      old_status = parse_diff_status(old_status[1]) if old_status
+      result[name] = change_type(old_status, status)
+    end
+    result
+  end
+  
+  def parse_diff_status(str)
+    # Hashdiff generates strings of the form "gemfile.ok[1]" to indicate this is the first change to the Hash under the :ok key
+    str.split('.').last.split('[').first.to_sym
+  end
+  
+  def change_type(old_status, new_status)
+    case
+    when new_status == :ok
+      :good_change
+    when outdated_type?(new_status) && old_status && STATUS_TYPES.find_index(new_status) > STATUS_TYPES.find_index(old_status)
+      :good_change
+    else
+      :bad_change
+    end
+  end
+  
+  def empty_status_hash
+    STATUS_TYPES.inject({}) {|result, type| result[type] = []; result }
+  end
+  
   def get_results(dependencies, dependency_types)
-    results = {}
-    STATUS_TYPES.each {|type| results[type] = []}
+    results = empty_status_hash
     if dependencies
       dependencies.select! {|dep| dependency_types.include?(dep.first.type)}
       dependencies.each do |dep, latest_version|

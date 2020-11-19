@@ -7,8 +7,8 @@ module WorkerHelpers
     logger.info(message) if ::CuttingEdge::App.enable_logging
   end
 
-  def add_to_store(identifier, dependencies)
-    ::CuttingEdge::App.store[identifier] = dependencies
+  def add_to_store(identifier, data)
+    ::CuttingEdge::App.store[identifier] = data
   end
 
   def get_from_store(identifier)

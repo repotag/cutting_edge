@@ -11,6 +11,7 @@ class DependencyWorker < GenericWorker
   # Order is significant for purposes of calculating results[:outdated]
   STATUS_TYPES = [:outdated_major, :outdated_minor, :outdated_patch, :ok, :no_requirement, :unknown]
   OUTDATED_TYPES = STATUS_TYPES[0..-4] # Which types indicate an outdated dependency. Used to calculate the total number of out-of-date dependencies.
+  EMPTY_STATUS_HASH = STATUS_TYPES.inject({}){|result, type| result[type] = []; result}
   
   def perform(identifier, lang, locations, dependency_types, to_addr, auth_token = nil)
     log_info 'Running Worker!'
@@ -75,7 +76,7 @@ class DependencyWorker < GenericWorker
   end
   
   def empty_status_hash
-    Hash[STATUS_TYPES.map {|status| [status, []]}]
+    STATUS_TYPES.inject({}) {|result, type| result[type] = []; result }
   end
   
   def get_results(dependencies, dependency_types)

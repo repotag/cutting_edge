@@ -29,21 +29,7 @@ describe DependencyWorker do
   let(:new_dependencies) {
     mock_dependencies('gollum-updated')
   }
-  
-  context 'dependency diff' do
-    it 'calculates whether dependencies have improved or worsened' do
-      expected = ['kramdown-parser-gfm', 'gollum-lib', 'foobar']
-      result = worker.send(:diff_dependencies, new_dependencies[:locations], old_dependencies[:locations])
-      inverted_result = worker.send(:diff_dependencies, old_dependencies[:locations], new_dependencies[:locations])
-      expected.each do |gem|
-        expect(result).to have_key(gem)
-        expect(inverted_result).to have_key(gem)
-        expect(result[gem]).to eq :good_change
-        expect(inverted_result[gem]).to eq :bad_change 
-      end
-    end
-  end
-  
+
   context 'http fetching files' do
     let(:response_ok) { MockResponse.new(200, 'body') }
     let(:response_not_found) { MockResponse.new(404, 'Not found') }
@@ -105,11 +91,11 @@ describe DependencyWorker do
     }
     
     context 'when the dependencies have changed' do
-      let(:dependency_diff) {  {'foobar' => :bad_change, 'gollum-lib' => :bad_change, 'kramdown-parser-gfm' => :bad_change} }
+      let(:dependency_diff) {  {'foobar' => :bad_change, 'gollum-lib' => :bad_change, 'kramdown-parser-gfm' => :good_change} }
     
       before(:each) {
         locations.each_key do |loc|
-          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc, true))
+          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum-updated', loc))
         end
         expect(worker).to receive(:badge_worker).with(identifier).and_return(true)
         expect(worker).to receive(:mail_worker).with(identifier, test_email).and_return(true)
@@ -129,7 +115,7 @@ describe DependencyWorker do
     
       before(:each) {
         locations.each_key do |loc|
-          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc, false))
+          expect(RubyLang).to receive(:parse_file).with(loc, 'fake').and_return(mock_fetched_requirements('gollum', loc))
         end
         expect(worker).not_to receive(:badge_worker)
         expect(worker).not_to receive(:mail_worker)

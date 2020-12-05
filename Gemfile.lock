@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cutting_edge (0.1)
+    cutting_edge (0.2)
       gemnasium-parser (~> 0.1.9)
       hashdiff (~> 1.0)
       http (~> 4.3)

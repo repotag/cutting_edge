@@ -4,7 +4,7 @@ require 'http'
 class PythonLang < Language
   # For Requirements.txt
   # See https://iscompatible.readthedocs.io/en/latest/
-  COMPARATORS = />=|>|<=|<|==/
+  COMPARATORS = />=|>|<=|<|==|~=/
   VERSION_NUM = /\d[\.\w]*/
   SUFFIX_OPTION = /\s*(\[.*\])?/
   NAME = /[^,]+/
@@ -55,6 +55,7 @@ class PythonLang < Language
           name, first_comp, first_version, _ignore, second_comp, second_version = match.captures
           first_comp = '=' if first_comp == '=='
           second_comp = '=' if second_comp == '=='
+          first_comp = '~>' if first_comp == '~='
           dep = Gem::Dependency.new(name.strip, "#{first_comp} #{first_version}")
           dep.requirement.concat(["#{second_comp} #{second_version}"]) if second_comp && second_version
         else

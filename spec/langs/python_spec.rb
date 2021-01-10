@@ -5,6 +5,7 @@ requests-oauthlib>=1.0.0 [PDF]
 -e svn+http://myrepo/svn/MyApp#egg=MyApp
 Flask>=0.7
 urlobject==1.0
+email-validator ~= 1.1.2
 six
 EOF
 
@@ -44,6 +45,7 @@ describe PythonLang do
       'requests-oauthlib': Gem::Version.new('1.3.0'),
       'Flask': Gem::Version.new('1.1.2'),
       'urlobject': Gem::Version.new('2.4.3'),
+      'email-validator': Gem::Version.new('1.1.2'),
       'six': Gem::Version.new('1.15.0'),
     }
   }
@@ -84,7 +86,7 @@ describe PythonLang do
       expect(PythonLang).to receive(:latest_version).and_return(*requirements_latest_versions.values)
       result = PythonLang.parse_file('requirements.txt', REQUIREMENT_TXT)
       expect(result).to be_a Array
-      expect(result.length).to eq 6
+      expect(result.length).to eq 7
       result.each do |dep, version|
         expect(dep).to be_a Gem::Dependency
         expect(dep.type).to eq :runtime

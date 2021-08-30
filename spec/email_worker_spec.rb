@@ -20,7 +20,19 @@ describe MailWorker do
     it 'returns nil' do
       expect(worker.perform(identifier, test_email)).to eq nil
     end
-  end 
+  end
+  
+  it 'does not list empty locations' do
+    dependencies[:locations]['Gemfile'] = DependencyWorker::EMPTY_STATUS_HASH
+    params = {
+      project: identifier,
+      url: CuttingEdge::SERVER_URL,
+      diff: {},
+      specs: dependencies
+    }
+    result = ERB.new(CuttingEdge::MAIL_TEMPLATE).result_with_hash(params)
+    expect(result).to_not include('Gemfile')
+  end
   
   context 'with valid dependencies' do
     before(:each) {

@@ -124,6 +124,7 @@
                         This is <a href="<%= url %>">CuttingEdge</a> informing you that the dependency status for <a href="<%= "#{url}/#{project}/info" %>"><%= project %></a> has changed.
                         </p>
                         <% specs[:locations].each do |filename, spec| %>
+                        <% next if spec.values.flatten.empty? %>
                           <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">
                           In <b><%= filename %></b>:
                           <% spec.each do |type, dependencies|

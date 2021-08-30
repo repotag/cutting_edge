@@ -22,8 +22,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'gemnasium-parser', '~> 0.1.9'
   s.add_dependency 'hashdiff', '~> 1.0'
-  s.add_dependency 'http', '~> 4.3'
-  s.add_dependency 'sucker_punch', '~> 2.1'
+  s.add_dependency 'http', '~> 5.0'
+  s.add_dependency 'sucker_punch', '~> 3.0'
   s.add_dependency 'sinatra', '~> 2.0'
   s.add_dependency 'moneta', '~> 1.2'
   s.add_dependency 'rufus-scheduler', '~> 3.6'

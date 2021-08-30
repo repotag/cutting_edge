@@ -16,6 +16,7 @@ github:
     flask-dance:
       language: python
       email: false
+      branch: main
   rust-lang:
     crates.io:
       language: rust

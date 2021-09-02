@@ -86,6 +86,16 @@ describe MailWorker do
         expect(html_body).to include('<li>rake ~> 12.3, >= 12.3.3 (latest: 13.0.1)</li>')
         expect(html_body).to include('<li style="color:green;">foobar = 1.0 (latest: 1.0)</li>')
       end
+      
+      context 'with multiple email' do
+        let(:test_email) { ['test1@test.org', 'test2@test.org'] }
+        
+        it 'sends an update mail' do
+          worker.perform(identifier, test_email)
+          mail = Mail::TestMailer.deliveries.first
+          expect(mail.to).to eq test_email
+        end
+      end
     end
   end
 end

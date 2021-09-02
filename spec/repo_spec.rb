@@ -12,6 +12,11 @@ describe CuttingEdge::Repository do
     expect(CuttingEdge::Repository.headers(nil)).to eq ({})
   end
   
+  it 'can take an array of email addresses' do
+    repo = CuttingEdge::GithubRepository.new(org: 'org', name: 'name', email: ['test1@test.org', 'test2@test2.org'])
+    expect(repo.contact_email).to eq ['test1@test.org', 'test2@test2.org']
+  end
+  
   context 'GitHub' do
     it 'has a headers method' do
       expect(CuttingEdge::GithubRepository.headers(nil)).to eq ({:accept => 'application/vnd.github.v3.raw'})

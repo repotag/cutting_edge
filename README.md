@@ -207,12 +207,14 @@ If you don't want to expose information about a project in (**such as an [API to
 module CuttingEdge
     require './lib/cutting_edge/repo.rb'
     REPOSITORIES = {
-      "gitlab/#{ENV['SECRET_REPO1_ORG']}/#{ENV['SECRET_REPO1_NAME']}" => GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_AUTH_TOKEN'], hide: ENV['SECRET_REPO1_HIDE_TOKEN'])
+      "gitlab/#{ENV['SECRET_REPO1_ORG']}/#{ENV['SECRET_REPO1_NAME']}" => GitlabRepository.new(org: ENV['SECRET_REPO1_ORG'], name: ENV['SECRET_REPO1_NAME'], auth_token: ENV['SECRET_REPO1_AUTH_TOKEN'], hide: ENV['SECRET_REPO1_HIDE_TOKEN'], email: 'myemail@mydomain.org')
     }
 end
 ```
 
 This approach is especially useful on Heroku, where you can use [Heroku config variables](https://devcenter.heroku.com/articles/config-vars).
+
+**NB: When adding repositories in config.rb, you must explicitly set the email attribute (or else email will be considered disabled for the repo).**
 
 ### Hide Repositories
 

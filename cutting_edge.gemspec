@@ -5,8 +5,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.4'
 
   s.name              = 'cutting_edge'
-  s.version           = '0.2'
-  s.date              = '2020-12-05'
+  s.version           = '0.2.1'
+  s.date              = '2021-09-02'
   s.license           = 'GPL-3.0-only'
 
   s.summary     = 'Self-hosted dependency monitoring, including shiny badges.'

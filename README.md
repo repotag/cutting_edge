@@ -1,6 +1,6 @@
 # CuttingEdge -- Simple, self-hosted dependency monitoring
 
-[![Build Status](https://travis-ci.org/repotag/cutting_edge.svg?branch=master)](https://travis-ci.org/repotag/cutting_edge)
+[![Ruby Build](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml/badge.svg)](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=master)](https://coveralls.io/github/repotag/cutting_edge?branch=master)
 [![Cutting Edge Dependency Status](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info)
 

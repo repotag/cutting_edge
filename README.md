@@ -63,11 +63,13 @@ CuttingEdge runs out of the box on Heroku, and is lightweight enough to function
 Steps:
 
 1. Clone/fork this repository, as it already contains some settings (in `heroku.config.rb`) relevant to Heroku
-1. Edit `projects.yml` and commit it to the repo
-1. `heroku create my-cuttingedge`
-1. `heroku config:add HEROKU_APP_NAME=my-cuttingedge`
-1. `git push heroku master`
-1. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
+1. Edit `projects.yml` and commit it to the repo.
+1. `gem install bundler && bundle install`
+2. `git add Gemfile.lock && git commit -m "Commit Gemfile.lock for use on Heroku"
+3. `heroku create my-cuttingedge`
+4. `heroku config:add HEROKU_APP_NAME=my-cuttingedge`
+5. `git push heroku master`
+6. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
   * `heroku addons:create mailgun:starter`
   * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
   * If you are on the free plan: [add your email addresses as Authorized Recipients](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients) in [Mailgun](https://app.mailgun.com/) (login via Heroku)

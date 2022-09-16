@@ -92,7 +92,7 @@ module CuttingEdge
       @org     = org
       @name    = name
       @auth_token = auth_token
-      @branch  = branch  || 'master'
+      @branch  = branch  || 'main'
       @hidden  = hide
       @lang    = lang || DEFAULT_LANG
       @contact_email = email

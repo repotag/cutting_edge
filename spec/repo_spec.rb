@@ -27,7 +27,7 @@ describe CuttingEdge::Repository do
       expect(CuttingEdge::GithubRepository).to_not be_nil
       github = CuttingEdge::GithubRepository.new(org: 'org', name: 'name')
       expect(github.source).to eq 'github'
-      expect(github.url_for_file('file')).to eq 'https://api.github.com/repos/org/name/contents/file?ref=master'
+      expect(github.url_for_file('file')).to eq 'https://api.github.com/repos/org/name/contents/file?ref=main'
       expect(github.url_for_project).to eq 'https://github.com/org/name'
     end
   end
@@ -40,7 +40,7 @@ describe CuttingEdge::Repository do
       expect(CuttingEdge::GitlabRepository.headers('token')).to eq ({:authorization => 'Bearer token'})
       gitlab = CuttingEdge::GitlabRepository.new(org: 'org', name: 'name')
       expect(gitlab.source).to eq 'gitlab'
-      expect(gitlab.url_for_file('file')).to eq 'https://gitlab.com/api/v4/projects/org%2fname/repository/files/file/raw?ref=master'
+      expect(gitlab.url_for_file('file')).to eq 'https://gitlab.com/api/v4/projects/org%2fname/repository/files/file/raw?ref=main'
       expect(gitlab.url_for_project).to eq 'https://gitlab.com/org/name'
     end
     
@@ -50,7 +50,7 @@ describe CuttingEdge::Repository do
       expect(defined?(CuttingEdge::GiteaRepository)).to_not be_nil
       gitea = CuttingEdge::GiteaRepository.new(org: 'org', name: 'name')
       expect(gitea.source).to eq 'gitea'
-      expect(gitea.url_for_file('file')).to eq 'https://mydependencymonitoring.com/api/v1/repos/org/name/raw/master/file'
+      expect(gitea.url_for_file('file')).to eq 'https://mydependencymonitoring.com/api/v1/repos/org/name/raw/main/file'
       expect(gitea.url_for_project).to eq 'https://mydependencymonitoring.com/org/name'
     end
   end

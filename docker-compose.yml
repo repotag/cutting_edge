@@ -1,0 +1,23 @@
+# Example of a simple docker-compose file to run CuttingEdge with a redis datastore
+# Simply run `docker-compose up`
+version: '3.8'
+services:
+  cache:
+    image: redis:7.0.5-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+  cuttingedge:
+    image: dometto/cuttingedge:master
+    environment:
+      REDIS_HOST: cache
+    command:
+      - -r redis://cache
+    depends_on:
+      - cache
+    ports:
+      - 4567:4567
+    links:
+      - cache
+    volumes:
+      - ./:/cutting_edge

@@ -4,6 +4,7 @@ require 'yaml'
 require 'rufus-scheduler'
 require 'optparse'
 require 'semantic_logger'
+require 'moneta'
 
 module CuttingEdge
   REFRESH_SCHEDULE = '1h'
@@ -41,6 +42,10 @@ opts = OptionParser.new do |opts|
   
   opts.on('-c', '--config [FILE]', 'Specify path to a .rb configuration file. Default: config.rb') do |file|
     options[:config] = file || 'config.rb'
+  end
+
+  opts.on('-r', '--redis [URL]', 'Use Redis as a datastore. Optionally specify the Redis URL. Default URL: `redis://localhost/.`') do |url|
+    ::CuttingEdge::STORE =  ::Moneta.new(:Redis, url: (url || 'redis://localhost/'))
   end
 end
 

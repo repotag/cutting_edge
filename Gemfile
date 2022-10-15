@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'redis', require: false
+gem 'thin', require: false
 
 group :development do
   gem 'rspec', '~> 3.9'

@@ -3,8 +3,11 @@
 [![Ruby Build](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml/badge.svg)](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=master)](https://coveralls.io/github/repotag/cutting_edge?branch=master)
 [![Cutting Edge Dependency Status](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dometto/cuttingedge)](https://hub.docker.com/r/dometto/cuttingedge)
 
 CuttingEdge monitors the status of the dependencies of your projects and lets you know when any of them go out of date.
+
+**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**.
 
 ## Features
 
@@ -21,8 +24,6 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Gitlab (both gitlab.com and [self-hosted instances](#Adding-self-hosted-repository-servers))
   * Gitea ([self-hosted](#Adding-self-hosted-repository-servers))
   * Both public and [private repositories](#Authorization-and-private-repositories)
-
-**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**.
  
 ## Requirements
 
@@ -36,23 +37,18 @@ CuttingEdge is lightweight and easy to deploy:
 
 ## Installation
 
-Simply:
+### Using Docker
 
-```
-$ gem install cutting_edge
-$ cutting_edge
-```
+To run CuttingEdge on port 4567 on the host machine, with config.rb and projects.yml in the current working directory, simply:
 
-Or run from source:
+`docker pull dometto/cuttingedge`
+`docker run -d --rm -p 4567:4567 -v $(pwd):/cutting_edge dometto/cuttingedge:master -c config.r`
 
-```
-$ git clone https://github.com/repotag/cutting_edge.git
-$ cd cutting_edge
-$ bundle install
-$ bundle exec cutting_edge
-```
+(Instead of using `master`, you can also use a release tag, e.g. `dometto/cuttingedge:v0.2.1`.)
 
 Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
+
+Also see our example [docker-compose](docker-compose.yml) file for an example of how to use CuttingEdge with [Redis as a datastore](#Using-Redis-and-other-data-stores) via Docker.
 
 ### Deploying on Heroku
 
@@ -77,6 +73,26 @@ Steps:
 You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
 
 Note that Heroku switches off apps running on their free plan when they idle, so you may want to look at [this](https://medium.com/better-programming/keeping-my-heroku-app-alive-b19f3a8c3a82).
+
+### As a gem
+
+Simply:
+
+```
+$ gem install cutting_edge
+$ cutting_edge
+```
+
+Or run from source:
+
+```
+$ git clone https://github.com/repotag/cutting_edge.git
+$ cd cutting_edge
+$ bundle install
+$ bundle exec cutting_edge
+```
+
+Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
 
 ## Usage
 

@@ -47,7 +47,7 @@ describe MailWorker do
       expect(worker.perform(identifier, nil)).to eq nil
     end
     
-    it 'handles nil for diff' do
+    it 'do not mail for empty diff' do
       params = {
         project: identifier,
         url: CuttingEdge::SERVER_URL,
@@ -55,7 +55,7 @@ describe MailWorker do
         specs: dependencies
       }
       expect(worker).to receive(:delete_from_store).with("diff-#{identifier}").and_return(nil)
-      expect_any_instance_of(ERB).to receive(:result_with_hash).with(params).and_call_original
+      expect_any_instance_of(ERB).not_to receive(:result_with_hash)
       worker.perform(identifier, test_email)
     end
     

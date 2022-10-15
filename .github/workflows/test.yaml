@@ -23,3 +23,7 @@ jobs:
           bundler-cache: true
       - name: exec rake
         run: bundle exec rake
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

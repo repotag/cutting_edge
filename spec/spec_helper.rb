@@ -1,11 +1,14 @@
 require 'simplecov'
+require 'simplecov-lcov'
 require 'fixtures'
 require 'rack/test'
 
 if ENV['CI']
-  require 'coveralls'
-  Coveralls.wear!
+  SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
+  SimpleCov::Formatter::LcovFormatter.config.single_report_path = 'coverage/lcov.info'
+  SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
 end
+SimpleCov.start
 
 ENV['RACK_ENV'] = 'test'
 

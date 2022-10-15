@@ -22,6 +22,8 @@ class MailWorker < GenericWorker
       diff = {}
     end
 
+    return if diff.empty?
+
     Mail.deliver do
       from     "CuttingEdge <#{CuttingEdge::MAIL_FROM}>"
       to       to_addr

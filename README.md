@@ -41,8 +41,8 @@ CuttingEdge is lightweight and easy to deploy:
 
 To run CuttingEdge on port 4567 on the host machine, with config.rb and projects.yml in the current working directory, simply:
 
-`docker pull dometto/cuttingedge`
-`docker run -d --rm -p 4567:4567 -v $(pwd):/cutting_edge dometto/cuttingedge:main -c config.r`
+* `docker pull dometto/cuttingedge:main`
+* `docker run -d --rm -p 4567:4567 -v $(pwd):/cutting_edge dometto/cuttingedge:main -c config.r`
 
 (Instead of using `main`, you can also use a release tag, e.g. `dometto/cuttingedge:v0.2.1`.)
 

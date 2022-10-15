@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'date'
+require 'tempfile'
 require 'rspec/core/rake_task'
 
 task :default => :rspec
@@ -94,15 +95,15 @@ end
 
 desc 'Create a release build and push to rubygems'
 task :release => :build do
-  unless `git branch` =~ /^\* master$/
-    puts "You must be on the master branch to release!"
+  unless `git branch` =~ /^\* main$/
+    puts "You must be on the main branch to release!"
     exit!
   end
   Rake::Task[:changelog].execute
   sh "git commit --allow-empty -a -m 'Release #{version}'"
-  sh "git pull --rebase origin master"
+  sh "git pull --rebase origin main"
   sh "git tag v#{version}"
-  sh "git push origin master"
+  sh "git push origin main"
   sh "git push origin v#{version}"
   sh "gem push pkg/#{name}-#{version}.gem"
 end

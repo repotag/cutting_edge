@@ -5,8 +5,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.4'
 
   s.name              = 'cutting_edge'
-  s.version           = '0.2.1'
-  s.date              = '2021-09-02'
+  s.version           = '0.3'
+  s.date              = '2022-10-15'
   s.license           = 'GPL-3.0-only'
 
   s.summary     = 'Self-hosted dependency monitoring, including shiny badges.'
@@ -33,8 +33,10 @@ Gem::Specification.new do |s|
   
   # = MANIFEST =
   s.files = %w[
+    Dockerfile
     Gemfile
-    Gemfile.lock
+    HISTORY.md
+    LATEST_CHANGES.md
     LICENSE
     Procfile
     README.md
@@ -42,6 +44,8 @@ Gem::Specification.new do |s|
     bin/cutting_edge
     config.rb
     cutting_edge.gemspec
+    docker-compose.yml
+    docker-run.sh
     heroku.config.rb
     lib/cutting_edge.rb
     lib/cutting_edge/app.rb

@@ -16,7 +16,7 @@ module CuttingEdge
   end
   # Your additional configuration goes here.
   # If you are going to host the repository containing this file publically (e.g. on GitHub), please read:
-  # https://github.com/repotag/cutting_edge/blob/master/README.md#Defining-repositories-in-configrb
+  # https://github.com/repotag/cutting_edge/blob/main/README.md#Defining-repositories-in-configrb
 end
 
 # Needed to write to Heroku logs.

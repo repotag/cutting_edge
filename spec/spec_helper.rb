@@ -2,7 +2,7 @@ require 'simplecov'
 require 'fixtures'
 require 'rack/test'
 
-if ENV['TRAVIS']
+if ENV['CI']
   require 'coveralls'
   Coveralls.wear!
 end

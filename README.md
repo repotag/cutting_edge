@@ -61,7 +61,7 @@ Steps:
 1. Clone/fork this repository, as it already contains some settings (in `heroku.config.rb`) relevant to Heroku
 1. Edit `projects.yml` and commit it to the repo.
 1. `gem install bundler && bundle install`
-2. `git add Gemfile.lock && git commit -m "Commit Gemfile.lock for use on Heroku"
+2. `git add Gemfile.lock && git commit -m "Commit Gemfile.lock for use on Heroku"`
 3. `heroku create my-cuttingedge`
 4. `heroku config:add HEROKU_APP_NAME=my-cuttingedge`
 5. `heroku addons:create heroku-redis:hobby-dev -a my-cuttingedge` (using Redis is highly recommended on Heroku)

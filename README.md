@@ -1,7 +1,7 @@
 # CuttingEdge -- Simple, self-hosted dependency monitoring
 
 [![Ruby Build](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml/badge.svg)](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=master)](https://coveralls.io/github/repotag/cutting_edge?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=main)](https://coveralls.io/github/repotag/cutting_edge?branch=main)
 [![Cutting Edge Dependency Status](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dometto/cuttingedge)](https://hub.docker.com/r/dometto/cuttingedge)
 
@@ -42,9 +42,9 @@ CuttingEdge is lightweight and easy to deploy:
 To run CuttingEdge on port 4567 on the host machine, with config.rb and projects.yml in the current working directory, simply:
 
 `docker pull dometto/cuttingedge`
-`docker run -d --rm -p 4567:4567 -v $(pwd):/cutting_edge dometto/cuttingedge:master -c config.r`
+`docker run -d --rm -p 4567:4567 -v $(pwd):/cutting_edge dometto/cuttingedge:main -c config.r`
 
-(Instead of using `master`, you can also use a release tag, e.g. `dometto/cuttingedge:v0.2.1`.)
+(Instead of using `main`, you can also use a release tag, e.g. `dometto/cuttingedge:v0.2.1`.)
 
 Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
 
@@ -125,7 +125,7 @@ This will make CuttingEdge monitor the GitHub project `my_org/my_project`. You c
 * `auth_token`: see [here](#Authorization-and-private-repositories)
 * `hide`: see [here](#Hide-repositories)
 * `locations`: use to change the default path to dependency definition files. For instance, for a Ruby project, CuttingEdge will by default try to monitor `Gemfile` and `my_project.gemspec`. You can override this with `language: [Gemfile, alternative/file.gemspec]`
-* `branch`: use a different branch than the default `master`
+* `branch`: use a different branch than the default `main`
 * `email`:
   * disable email notifications for a single project by setting this to `false`
   * use a non-default address delivery address for this project by setting this to e.g. `myproject@mydependencymonitoring.com`

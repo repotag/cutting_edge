@@ -146,7 +146,7 @@ class DependencyWorker < GenericWorker
     begin
       response = HTTP.headers(@provider.headers(@auth_token)).get(url)
       response.status == 200 ? response.to_s : nil
-    rescue HTTP::TimeoutError => e
+    rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError => e
       log_info("Encountered error when fetching latest version of #{url}: #{e.class} #{e.message}")
     end
   end

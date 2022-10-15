@@ -68,8 +68,9 @@ Steps:
 2. `git add Gemfile.lock && git commit -m "Commit Gemfile.lock for use on Heroku"
 3. `heroku create my-cuttingedge`
 4. `heroku config:add HEROKU_APP_NAME=my-cuttingedge`
-5. `git push heroku master`
-6. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
+5. `heroku addons:create heroku-redis:hobby-dev -a my-cuttingedge` (using Redis is highly recommended on Heroku)
+6. `git push heroku master`
+7. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
   * `heroku addons:create mailgun:starter`
   * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
   * If you are on the free plan: [add your email addresses as Authorized Recipients](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients) in [Mailgun](https://app.mailgun.com/) (login via Heroku)

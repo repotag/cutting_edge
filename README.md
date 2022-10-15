@@ -46,7 +46,7 @@ To run CuttingEdge on port 4567 on the host machine, with config.rb and projects
 
 (Instead of using `main`, you can also use a release tag, e.g. `dometto/cuttingedge:v0.2.1`.)
 
-Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
+Before running, define your repositories in [projects.yml](#projectsyml). You may also want to change some settings in [config.rb](#configrb).
 
 Also see our example [docker-compose](docker-compose.yml) file for an example of how to use CuttingEdge with [Redis as a datastore](#Using-Redis-and-other-data-stores) via Docker.
 
@@ -93,7 +93,7 @@ $ bundle install
 $ bundle exec cutting_edge
 ```
 
-Before running, define your repositories in [projects.yml](#projects-yml). You may also want to change some settings in [config.rb](#config-rb).
+Before running, define your repositories in [projects.yml](#projectsyml). You may also want to change some settings in [config.rb](#configrb).
 
 ## Usage
 
@@ -172,7 +172,7 @@ end
 
 See [the mail gem](https://github.com/mikel/mail#sending-an-email) for more information.
 
-You can switch off email notifications for a single project by setting its `email:` key to `false` in [projects.yml](#projects-yml). Alternatively, you can set the `email:` key for a single project to a different address than the default `MAIL_TO`.
+You can switch off email notifications for a single project by setting its `email:` key to `false` in [projects.yml](#projectsyml). Alternatively, you can set the `email:` key for a single project to a different address than the default `MAIL_TO`.
 
 ### Adding self-hosted repository servers
 

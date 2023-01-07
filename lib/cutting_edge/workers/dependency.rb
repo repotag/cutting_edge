@@ -145,7 +145,12 @@ class DependencyWorker < GenericWorker
   def http_get(url)
     begin
       response = HTTP.headers(@provider.headers(@auth_token)).get(url)
-      response.status == 200 ? response.to_s : nil
+      if response.status == 200
+        response.to_s
+      else
+        log_info "Failed to get #{url}: #{response.inspect}"
+        nil
+      end
     rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError => e
       log_info("Encountered error when fetching latest version of #{url}: #{e.class} #{e.message}")
     end

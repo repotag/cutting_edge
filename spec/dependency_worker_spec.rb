@@ -55,7 +55,7 @@ describe DependencyWorker do
       header = "Bearer #{token}"
       worker.instance_variable_set(:@auth_token, token)
       expect(::CuttingEdge::GitlabRepository).to receive(:headers).with(token).exactly(:once).and_call_original
-      expect(HTTP).to receive(:headers).with(:authorization => 'Bearer token').exactly(:once).and_call_original
+      expect(HTTP).to receive(:headers).with({:authorization => 'Bearer token'}).exactly(:once).and_call_original
       expect_any_instance_of(HTTP::Client).to receive(:get).with(url).and_return(response_ok)
       expect(worker.send(:http_get, url)).to eq 'body'
     end

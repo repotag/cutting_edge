@@ -51,11 +51,11 @@ Also see our example [docker-compose](docker-compose.yml) file for an example of
 
 ### Deploying on Render
 
-CuttingEdge runs out of the box on Render.com, and is lightweight enough to function on the free plan. This repository already contains the `render.yaml` needed for deployment.
+CuttingEdge runs out of the box on [Render.com](https://render.com), and is lightweight enough to function on the free plan. This repository already contains the `render.yaml` needed for deployment.
 
 **Note: on Render, CuttingEdge uses `render.config.rb` instead of `config.rb`**.
 
-**Note: if you will be using a public GitHub or GitLab repo to host your CuttingEdge configuration, make sure not to put any secrets in `render.config.rb` or `projects.yaml`.**. Instead, use [environment variables](https://render.com/docs/environment-variables) (for instance to [set authentication tokens](#Authorization-and-private-repositories)). **You can also add `render.config.rb` and `projects.yaml` as "secret files" on the Render.com Dashboard instead of committing them to your repo!**
+**Note: if you will be using a public GitHub or GitLab repo to host your CuttingEdge configuration, make sure not to put any secrets in `render.config.rb` or `projects.yaml`.** Instead, use [environment variables](https://render.com/docs/environment-variables) (for instance to [set authentication tokens](#Authorization-and-private-repositories)). **You can also add `render.config.rb` and `projects.yaml` as "secret files" on the Render.com Dashboard instead of committing them to your repo!**
 
 Steps:
 
@@ -65,7 +65,7 @@ Steps:
 1. Edit your `projects.yml` to suit your needs and commit it to the repo (or add it as a secret file).
 1. Edit your `render.config.rb` to suit your needs and commit it to the repo (or add it as a secret file).
 1. `gem install bundler && bundle install`
-1. `git add Gemfile.lock && bundle lock --add-platform x86_64-linux && git commit -m "Commit Gemfile.lock for use on Render"
+1. `git add Gemfile.lock && bundle lock --add-platform x86_64-linux && git commit -m "Commit Gemfile.lock for use on Render"`
 1. On Render.com, create a new Blueprint instance:
   * On the Render Dashboard, go to the Blueprint page and click the New Blueprint Instance button.
   * Connect your forked repository.

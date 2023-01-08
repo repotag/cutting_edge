@@ -30,10 +30,11 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
 CuttingEdge is lightweight and easy to deploy: 
 
 * No database required
-  * you can optionally use [data stores like Redis](#Using-Redis-and-other-data-stores)
+  * but you can optionally use [data stores like Redis](#Using-Redis-and-other-data-stores)
 * Simple configuration through a `projects.yml` file
 * Requires relatively few resources (~120MB RAM), so...
-* It can even run on [Heroku](#Deploying-on-Heroku)'s free plan!
+* It can even run on many hosting services' free plans, such as [Render.com](https://render.com)
+  * Easily deploy CuttingEdge to Render.com with the provided [configuration]()!
 
 ## Installation
 
@@ -50,30 +51,34 @@ Before running, define your repositories in [projects.yml](#projectsyml). You ma
 
 Also see our example [docker-compose](docker-compose.yml) file for an example of how to use CuttingEdge with [Redis as a datastore](#Using-Redis-and-other-data-stores) via Docker.
 
-### Deploying on Heroku
+### Deploying on Render
 
-CuttingEdge runs out of the box on Heroku, and is lightweight enough to function on the Heroku free plan. This repository already contains the `Procfile` needed for deployment.
+CuttingEdge runs out of the box on Render.com, and is lightweight enough to function on the free plan. This repository already contains the `render.yaml` needed for deployment.
 
-**Note: on Heroku, CuttingEdge uses `heroku.config.rb` instead of `config.rb`**.
+**Note: on Render, CuttingEdge uses `render.config.rb` instead of `config.rb`**.
+
+**Note: if you will be using a public GitHub or GitLab repo to host your CuttingEdge configuration, make sure not to put any secrets in `render.config.rb` or `projects.yaml`.**. Instead, use [environment variables](https://render.com/docs/environment-variables) (for instance to [set authentication tokens](#Authorization-and-private-repositories)). **You can also add `render.config.rb` and `projects.yaml` as "secret files" on the Render.com Dashboard instead of committing them to your repo!**
 
 Steps:
 
-1. Clone/fork this repository, as it already contains some settings (in `heroku.config.rb`) relevant to Heroku
-1. Edit `projects.yml` and commit it to the repo.
+1. Fork this repository (for use on Render.com, your fork needs to be available on GitHub or GitLab).
+1. Clone your fork locally.
+1. Edit your `render.yaml` (set a name for your instance) and commit it to the repo.
+1. Edit your `projects.yml` to suit your needs and commit it to the repo (or add it as a secret file).
+1. Edit your `render.config.rb` to suit your needs and commit it to the repo (or add it as a secret file).
 1. `gem install bundler && bundle install`
-2. `git add Gemfile.lock && git commit -m "Commit Gemfile.lock for use on Heroku"`
-3. `heroku create my-cuttingedge`
-4. `heroku config:add HEROKU_APP_NAME=my-cuttingedge`
-5. `heroku addons:create heroku-redis:hobby-dev -a my-cuttingedge` (using Redis is highly recommended on Heroku)
-6. `git push heroku master`
-7. *Optional, if you want to receive [email notifications](#Email-Notifications)*:
-  * `heroku addons:create mailgun:starter`
-  * `heroku config:add CUTTING_EDGE_MAIL_TO=mydependencies@mydependencymonitoring.com`
-  * If you are on the free plan: [add your email addresses as Authorized Recipients](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients) in [Mailgun](https://app.mailgun.com/) (login via Heroku)
+1. `git add Gemfile.lock && bundle lock --add-platform x86_64-linux && git commit -m "Commit Gemfile.lock for use on Render"
+1. On Render.com, create a new Blueprint instance:
+  * On the Render Dashboard, go to the Blueprint page and click the New Blueprint Instance button.
+  * Connect your forked repository.
+1. Render.com will now deploy your instance of CuttingEdge!
+  * Re-deployment will be triggered whenever you push to your GitHub or GitLab repo, or whenver you update the environment variables or secret files on the Render.com Dashboard.
 
-You may also want to set some [Heroku config variables](https://devcenter.heroku.com/articles/config-vars), for instance to [use authentication tokens](#Authorization-and-private-repositories) in `heroku.config.rb`.
+Note that Render switches off apps running on their free plan when they idle, so you may want to ensure your app does not idle by polling it periodically, or upgrade to a higher plan.
 
-Note that Heroku switches off apps running on their free plan when they idle, so you may want to look at [this](https://medium.com/better-programming/keeping-my-heroku-app-alive-b19f3a8c3a82).
+### Deploying on Heroku
+
+Heroku's free plan has been discontinued, but this Repository still contains the necessary `Procfile` and `heroku.config.rb` for hosting CuttingEdge on Heroku. See [here](https://github.com/repotag/cutting_edge/blob/main/heroku/HEROKU_HOWTO.md) for instructions.
 
 ### As a gem
 

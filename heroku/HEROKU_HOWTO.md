@@ -2,7 +2,7 @@
 
 **Note: on Heroku, CuttingEdge uses `heroku.config.rb` instead of `config.rb`**.
 
-**Note: if you will be using a public GitHub or GitLab repo to host your CuttingEdge configuration, make sure not to put any secrets in `heroku.config.rb` or `projects.yaml`.**. Instead, use [environment variables](https://render.com/docs/environment-variables) (for instance to [set authentication tokens](https://github.com/repotag/cutting_edge/blob/main/README.md#Authorization-and-private-repositories)).
+**Note: if you will be using a public GitHub or GitLab repo to host your CuttingEdge configuration, make sure not to put any secrets in `heroku.config.rb` or `projects.yaml`.** Instead, use [environment variables](https://render.com/docs/environment-variables) (for instance to [set authentication tokens](https://github.com/repotag/cutting_edge/blob/main/README.md#Authorization-and-private-repositories)).
 
 Steps:
 

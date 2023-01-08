@@ -1,0 +1,28 @@
+# Blueprint for use with render.com: https://render.com/docs/blueprint-spec
+# Update name below: the instance will be deployed to https://$name.onrender.com
+# Modify projects.yml and render.config.rb in your repo, or add them as secret files via the render.com Dashboard
+
+services:
+  - type: web
+    env: ruby
+    name: my-cuttingedge
+    buildCommand: bundle install
+    startCommand: bundle exec cutting_edge -p $PORT --config render.config.rb
+    plan: free
+    envVars:
+      - key: PORT
+        value: 4567
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: ce-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: ce-redis
+          property: port
+  - type: redis
+    name: ce-redis
+    ipAllowList: []
+    plan: free

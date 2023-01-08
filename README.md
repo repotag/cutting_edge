@@ -76,7 +76,7 @@ Note that Render switches off apps running on their free plan when they idle, so
 
 ### Deploying on Heroku
 
-Heroku's free plan has been discontinued, but this Repository still contains the necessary `Procfile` and `heroku.config.rb` for hosting CuttingEdge on Heroku. See [here](https://github.com/repotag/cutting_edge/blob/main/heroku/HEROKU_HOWTO.md) for instructions.
+Heroku's free plan has been discontinued, but this Repository still contains the necessary files for hosting CuttingEdge on Heroku. See [here](https://github.com/repotag/cutting_edge/blob/main/heroku/HEROKU_HOWTO.md) for instructions.
 
 ### As a gem
 
@@ -108,7 +108,7 @@ When your instance of CuttingEdge is running, you can visit the landing page by 
 
 An instance on Heroku will be accessible through:
 
-`https://your-app-name.herokuapp.com/`
+`https://your-app-name.onrender.com/`
 
 ### projects.yml
 
@@ -234,7 +234,7 @@ module CuttingEdge
 end
 ```
 
-This approach is especially useful on Heroku, where you can use [Heroku config variables](https://devcenter.heroku.com/articles/config-vars).
+This approach is especially useful on services like Render.com, where you can use [environment variables](https://render.com/docs/environment-variables).
 
 **NB: When adding repositories in config.rb, you must explicitly set the email attribute (or else email will be considered disabled for the repo).**
 
@@ -306,7 +306,7 @@ end
 
 See the [Moneta](https://github.com/moneta-rb/moneta) instructions.
 
-Note that Heroku offers a free [Redis Add-on](https://elements.heroku.com/addons/heroku-redis).
+Note that the default [configuration for Render](#Deploying-on-Render) includes use of a free Redis instance.
 
 ## Contributing
 

@@ -24,17 +24,15 @@ CuttingEdge monitors the status of the dependencies of your projects and lets yo
   * Gitlab (both gitlab.com and [self-hosted instances](#Adding-self-hosted-repository-servers))
   * Gitea ([self-hosted](#Adding-self-hosted-repository-servers))
   * Both public and [private repositories](#Authorization-and-private-repositories)
- 
-## Requirements
 
-CuttingEdge is lightweight and easy to deploy: 
+CuttingEdge is lightweight and easy to deploy:
 
 * No database required
   * but you can optionally use [data stores like Redis](#Using-Redis-and-other-data-stores)
 * Simple configuration through a `projects.yml` file
 * Requires relatively few resources (~120MB RAM), so...
 * It can even run on many hosting services' free plans, such as [Render.com](https://render.com)
-  * Easily deploy CuttingEdge to Render.com with the provided [configuration]()!
+  * Easily deploy to Render.com with the provided [configuration](#Deploying-on-Render)!
 
 ## Installation
 

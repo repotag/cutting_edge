@@ -2,18 +2,18 @@
 
 [![Ruby Build](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml/badge.svg)](https://github.com/repotag/cutting_edge/actions/workflows/test.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/repotag/cutting_edge/badge.svg?branch=main)](https://coveralls.io/github/repotag/cutting_edge?branch=main)
-[![Cutting Edge Dependency Status](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info)
+[![Cutting Edge Dependency Status](https://cuttingedge.onrender.com/github/repotag/cutting_edge/svg 'Cutting Edge Dependency Status')](https://cuttingedge.onrender.com/github/repotag/cutting_edge/info)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dometto/cuttingedge)](https://hub.docker.com/r/dometto/cuttingedge)
 
 CuttingEdge monitors the status of the dependencies of your projects and lets you know when any of them go out of date.
 
-**View the web front end of a [live instance](https://dometto-cuttingedge.herokuapp.com/)**.
+**View the web front end of a [live instance](https://cuttingedge.onrender.com/)**.
 
 ## Features
 
 * Generates badge images that you can include in your projects' Readme, like the one above!
 * Can send you email when the status of a project's dependencies changes
-* Serves a simple [info page](https://dometto-cuttingedge.herokuapp.com/github/repotag/cutting_edge/info) detailing the status of each project
+* Serves a simple [info page](https://cuttingedge.onrender.com/github/repotag/cutting_edge/info) detailing the status of each project
 * Supports the following languages:
   * Ruby
   * Python
